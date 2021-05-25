@@ -9,30 +9,30 @@ using namespace std;
 
 char figure[7][4][5] = {
 	{
-		"OO",
+		"OO",  // 0
 		"OO"
 	},
 	{
-		"O  ",
+		"O  ", // 1
 		"OOO"
 	},
 	{
-		"  O",
+		"  O", // 2
 		"OOO"
 	},
 	{
-		"OOOO"
+		"OOOO" // 3
 	},
 	{
-		" O ",
+		" O ", // 4
 		"OOO"
 	},
 	{
-		" OO",
+		" OO", // 5
 		"OO "
 	},
 	{
-		"OO ",
+		"OO ", // 6
 		" OO"
 	}
 };
@@ -99,14 +99,14 @@ int main()
 	//}
 	//DrawScreen();
 	int x = 0, y = 0;
-	int f = 1;
+	int f = 6;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		if (GetAsyncKeyState(VK_LEFT) < 0) x--;
 		if (GetAsyncKeyState(VK_RIGHT) < 0) x++;
-		x = clamp(x, 0, 10 - 2);
+		x = clamp(x, 0, 10 - (int)strlen(figure[f][0]));
 		if (GetAsyncKeyState(VK_UP) < 0) y--;
 		if (GetAsyncKeyState(VK_DOWN) < 0) y++;
-		y = clamp(y, 0, 9 - 2);
+		y = clamp(y, 0, 9 - (figure[f][1][0] ? 2 : 1) );
 		ClearScreen();
 		DrawScreen();
 		DrawFigure(f, x, y);
