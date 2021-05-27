@@ -38,7 +38,7 @@ char screen[10][13] = {
 	"|          |",
 	"|          |",
 	"|          |",
-	"| O        |",
+	"|          |",
 	"------------"
 };
 
@@ -53,13 +53,26 @@ void DrawScreen()
 	}
 }
 
-void DrawFigure(int n, int rot, short x, short y)
+void DrawFigure(int num, int rot, short x, short y)
 {
-	for (short r = 0; r < 4 && figure[n][rot][r][0]; r++) {
-		SetConsoleCursorPosition(out, { short(11 + x), short(r + y) } );
-		auto f = figure[n][rot][r];
-		WriteConsoleA(out, f, strlen(f), 0, 0);
-		//cout << "\t\t" << screen[i] << '\n';
+	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
+			if (figure[num][rot][r][c] == 'O') {
+				SetConsoleCursorPosition(out, { short(11 + x + c), short(r + y) });
+				WriteConsoleA(out, &figure[num][rot][r][c], 1, 0, 0);
+			}
+		}
+	}
+}
+
+void PlaceFigure(int num, int rot, short x, short y)
+{
+	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
+			if (figure[num][rot][r][c] == 'O') {
+				screen[y + r][x + c + 1] = figure[num][rot][r][c];
+			}
+		}
 	}
 }
 
@@ -69,6 +82,7 @@ void ClearScreen()
 		SetConsoleCursorPosition(out, { 10,r });
 		WriteConsoleA(out, "            ", 12, 0, 0);
 	}
+	
 }
 
 void CursorOff()
@@ -96,25 +110,32 @@ int main()
 	int x = len == 2 ? 4 : 3, y = 0;
 	int i = 0;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
-		len = strlen(figure[f][rot][0]);
-		int h = !figure[f][rot][1][0] ? 1 :
-			    !figure[f][rot][2][0] ? 2 :
-				!figure[f][rot][3][0] ? 3 :
-										4 ;
 		if (GetAsyncKeyState(VK_LEFT) < 0) x--;
 		if (GetAsyncKeyState(VK_RIGHT) < 0) x++;
-		x = clamp(x, 0, 10 - len);
 		if (GetAsyncKeyState(VK_UP) & 1) rot++;
 		if (GetAsyncKeyState('C') & 1) rot--;
-		rot &= 3;
-
 		if (GetAsyncKeyState(VK_DOWN) < 0) y++;
+
+		rot &= 3;
+		len = strlen(figure[f][rot][0]);
+		int h = !figure[f][rot][1][0] ? 1 :
+			!figure[f][rot][2][0] ? 2 :
+			!figure[f][rot][3][0] ? 3 :
+			4;
+
+		x = clamp(x, 0, 10 - len);
 		y = clamp(y, 0, 9 - h);
-		ClearScreen();
+	
 		DrawScreen();
 		DrawFigure(f, rot, x, y);
 		Sleep(16);
-		if( i % 10 == 9) y++;
+		if (i % 10 == 9) {
+			if (y == 9 - h) {
+				PlaceFigure(f, rot, x, y);
+			}else{
+				y++;
+			}
+		}
 		i++;
 	}
 	
