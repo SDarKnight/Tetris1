@@ -132,6 +132,10 @@ int main()
 		if (i % 10 == 9) {
 			if (y == 9 - h) {
 				PlaceFigure(f, rot, x, y);
+				f = rand() % 7;
+				rot = 0;
+				len = strlen(figure[f][rot][0]);
+				x = len == 2 ? 4 : 3, y = 0;
 			}else{
 				y++;
 			}
