@@ -1,11 +1,4 @@
-#include <iostream>
-#include <cstdlib>
-#include <string>
-#include <windows.h>
-#include <stdlib.h>
-#include <algorithm>
-
-using namespace std;
+#include "pch.h"
 
 char figure[7][4][4][5] = {
 	{ {"OO","OO"}, {"OO","OO"}, {"OO","OO"}, {"OO","OO"} },					// OO	0
