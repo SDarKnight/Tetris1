@@ -23,16 +23,16 @@ char figure[7][4][4][5] = {
 };
 
 char screen[10][13] = {
-	"|          |",
-	"|          |",
-	"|          |",
-	"|          |",
-	"|          |",
-	"|          |",
-	"|          |",
-	"|          |",
-	"|          |",
-	"------------"
+	"|          |", // 0
+	"|          |", // 1
+	"|          |", // 2
+	"|          |", // 3
+	"|          |", // 4
+	"|          |", // 5
+	"|          |", // 6
+	"|          |", // 7
+	"|          |", // 8
+	"------------"  // 9
 };
 
 HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -113,13 +113,42 @@ void CursorOff()
 int f;
 int rot;
 int x, y;
+int frameSkip = 20;
 
-void DropNewFigue()
+void DropNewFigure()
 {
 	f = rand() % 7;
 	rot = 0;
 	x = strlen(figure[f][rot][0]) == 2 ? 4 : 3;
 	y = 0;
+}
+
+void ClearLine(int y)
+{
+	for (int r = y; r > 0; r--) {
+		for (int c = 1; c < 11; c++) {
+			screen[r][c] = screen[r - 1][c];
+		}
+	}
+	for (int c = 1; c < 11; c++) {
+		screen[0][c] = ' ';
+	}
+}
+
+void CheckLines()
+{
+	for (int r = 0; r < 9; r++) {
+		bool full = true;
+		for (int c = 1; c < 11; c++) {
+			if (screen[r][c] == ' ') {
+				full = false;
+				break;
+			}
+		}
+		if (full) {
+			ClearLine(r);
+		}
+	}
 }
 
 int main()
@@ -133,7 +162,7 @@ int main()
 	//	ClearScreen(i);
 	//}
 	//DrawScreen();
-	DropNewFigue();
+	DropNewFigure();
 	int i = 0;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		if (GetAsyncKeyState(VK_LEFT) < 0 && CanPlaceFigure(f, rot, x - 1, y)) x--;
@@ -145,14 +174,15 @@ int main()
 		rot &= 3;
 		x = clamp(x, 0, 10 - (int)strlen(figure[f][rot][0]));
 
-		if (i % 30 == 29) {
+		if (i % frameSkip == frameSkip - 1) {
 			if (CanPlaceFigure(f, rot, x, y + 1)) {
 				y++;
 			} else {
 				PlaceFigure(f, rot, x, y);
-				DropNewFigue();
+				DropNewFigure();
 			}
 		}
+		CheckLines();
 		DrawScreen();
 		DrawFigure(f, rot, x, y);
 		Sleep(16);
@@ -162,5 +192,27 @@ int main()
 	SetConsoleCursorPosition(out, { 0,15 });
 	WriteConsoleA(out, "\n", 1, 0, 0);
     return 0;
-	
 }
+
+/* TODO:
+ 1. Сделать подсчёт очков.
+ 2. Добавить уровни сложности.
+ 3. Добавить функцию очистки экрана при заполнении поля или перехода к следующему уровню.
+ 4. Показывать следующие фигуры и откладывать фигуры.
+ 5. Разноцветные фигуры.
+ 6. Сделать динамический размер игрового поля.
+ 7. Коррекция координат при повороте.
+ 8. Разная вероятность выпадения фигур.
+ 9. Добавить мультиплеер на одном компьютере.
+ 10. Добавить игровое меню.
+ 11. Добавить звук в игре.
+
+ 20. Добавить мультиплеер по сети.
+ 21. Добавить графический режим.
+ 22. Добавить мобильную версию.
+ 23. Выложить в Play Market и Steam.
+ 24. Приготовить мешок и лопату для сбора денег.
+ 25. Пить коктейль через соломинку лёжа на гамаке в Малибу.
+ 26. ...
+ 27. Profit!!!
+*/
