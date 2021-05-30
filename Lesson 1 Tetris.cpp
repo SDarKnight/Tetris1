@@ -62,11 +62,35 @@ void PlaceFigure(int num, int rot, short x, short y)
 {
 	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
 		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
-			if (figure[num][rot][r][c] == 'O') {
+			if (figure[num][rot][r][c] != ' ') {
 				screen[y + r][x + c + 1] = figure[num][rot][r][c];
 			}
 		}
 	}
+}
+
+int FigureHeight(int f, int rot)
+{
+	return !figure[f][rot][1][0] ? 1 :
+		!figure[f][rot][2][0] ? 2 :
+		!figure[f][rot][3][0] ? 3 :
+		4;
+}
+
+
+bool CanPlaceFigure(int num, int rot, int x, int y)
+{
+	if (y >= 10 - FigureHeight(num, rot)) {
+		return false;
+	}
+	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
+			if (figure[num][rot][r][c] != ' ' && screen[y + r][x + c + 1] != ' ') {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 void ClearScreen()
@@ -86,6 +110,18 @@ void CursorOff()
 	SetConsoleCursorInfo(out, &cursorInfo);
 }
 
+int f;
+int rot;
+int x, y;
+
+void DropNewFigue()
+{
+	f = rand() % 7;
+	rot = 0;
+	x = strlen(figure[f][rot][0]) == 2 ? 4 : 3;
+	y = 0;
+}
+
 int main()
 {
 	CursorOff();
@@ -97,42 +133,29 @@ int main()
 	//	ClearScreen(i);
 	//}
 	//DrawScreen();
-	int f = rand() % 7;
-	int rot = 0;
-	int len = strlen(figure[f][rot][0]);
-	int x = len == 2 ? 4 : 3, y = 0;
+	DropNewFigue();
 	int i = 0;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
-		if (GetAsyncKeyState(VK_LEFT) < 0) x--;
-		if (GetAsyncKeyState(VK_RIGHT) < 0) x++;
-		if (GetAsyncKeyState(VK_UP) & 1) rot++;
-		if (GetAsyncKeyState('C') & 1) rot--;
-		if (GetAsyncKeyState(VK_DOWN) < 0) y++;
+		if (GetAsyncKeyState(VK_LEFT) < 0 && CanPlaceFigure(f, rot, x - 1, y)) x--;
+		if (GetAsyncKeyState(VK_RIGHT) < 0 && CanPlaceFigure(f, rot, x + 1, y)) x++;
+		if (GetAsyncKeyState(VK_UP) & 1 && CanPlaceFigure(f, (rot + 1) & 3, x, y)) rot++;
+		if (GetAsyncKeyState('C') & 1 && CanPlaceFigure(f, (rot - 1) & 3, x, y)) rot--;
+		if (GetAsyncKeyState(VK_DOWN) < 0 && CanPlaceFigure(f, rot, x, y + 1)) y++;
 
 		rot &= 3;
-		len = strlen(figure[f][rot][0]);
-		int h = !figure[f][rot][1][0] ? 1 :
-			!figure[f][rot][2][0] ? 2 :
-			!figure[f][rot][3][0] ? 3 :
-			4;
+		x = clamp(x, 0, 10 - (int)strlen(figure[f][rot][0]));
 
-		x = clamp(x, 0, 10 - len);
-		y = clamp(y, 0, 9 - h);
-	
+		if (i % 30 == 29) {
+			if (CanPlaceFigure(f, rot, x, y + 1)) {
+				y++;
+			} else {
+				PlaceFigure(f, rot, x, y);
+				DropNewFigue();
+			}
+		}
 		DrawScreen();
 		DrawFigure(f, rot, x, y);
 		Sleep(16);
-		if (i % 10 == 9) {
-			if (y == 9 - h) {
-				PlaceFigure(f, rot, x, y);
-				f = rand() % 7;
-				rot = 0;
-				len = strlen(figure[f][rot][0]);
-				x = len == 2 ? 4 : 3, y = 0;
-			}else{
-				y++;
-			}
-		}
 		i++;
 	}
 	
