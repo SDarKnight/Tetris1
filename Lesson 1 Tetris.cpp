@@ -35,6 +35,12 @@ char screen[10][13] = {
 	"------------"  // 9
 };
 
+int f;
+int rot;
+int x, y;
+int frameSkip = 20;
+int frame = 0;
+
 HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
 void DrawScreen()
@@ -110,11 +116,6 @@ void CursorOff()
 	SetConsoleCursorInfo(out, &cursorInfo);
 }
 
-int f;
-int rot;
-int x, y;
-int frameSkip = 20;
-
 void DropNewFigure()
 {
 	f = rand() % 7;
@@ -151,6 +152,12 @@ void CheckLines()
 	}
 }
 
+void DrawInfo()
+{
+	SetConsoleCursorPosition(out, { 30,1 });
+	cout << "frame: " << frame % frameSkip << '\t';
+}
+
 int main()
 {
 	CursorOff();
@@ -163,7 +170,6 @@ int main()
 	//}
 	//DrawScreen();
 	DropNewFigure();
-	int i = 0;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		if (GetAsyncKeyState(VK_LEFT) < 0 && CanPlaceFigure(f, rot, x - 1, y)) x--;
 		if (GetAsyncKeyState(VK_RIGHT) < 0 && CanPlaceFigure(f, rot, x + 1, y)) x++;
@@ -174,7 +180,7 @@ int main()
 		rot &= 3;
 		x = clamp(x, 0, 10 - (int)strlen(figure[f][rot][0]));
 
-		if (i % frameSkip == frameSkip - 1) {
+		if (frame % frameSkip == frameSkip - 1) {
 			if (CanPlaceFigure(f, rot, x, y + 1)) {
 				y++;
 			} else {
@@ -185,8 +191,9 @@ int main()
 		CheckLines();
 		DrawScreen();
 		DrawFigure(f, rot, x, y);
+		DrawInfo();
 		Sleep(16);
-		i++;
+		frame++;
 	}
 	
 	SetConsoleCursorPosition(out, { 0,15 });
