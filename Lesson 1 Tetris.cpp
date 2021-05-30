@@ -40,6 +40,9 @@ int rot;
 int x, y;
 int frameSkip = 20;
 int frame = 0;
+int scores = 0;
+int level = 1;
+int levelLinesCleared = 0;
 
 HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -101,11 +104,11 @@ bool CanPlaceFigure(int num, int rot, int x, int y)
 
 void ClearScreen()
 {
-	for (short r = 0; r < 10; r++) {
-		SetConsoleCursorPosition(out, { 10,r });
-		WriteConsoleA(out, "            ", 12, 0, 0);
+	for (int r = y; r > 0; r--) {
+		for (int c = 1; c < 11; c++) {
+			screen[r][c] = ' ';
+		}
 	}
-	
 }
 
 void CursorOff()
@@ -138,6 +141,8 @@ void ClearLine(int y)
 
 void CheckLines()
 {
+	int linesCleared = 0;
+	int cellsRemoved = 0;
 	for (int r = 0; r < 9; r++) {
 		bool full = true;
 		for (int c = 1; c < 11; c++) {
@@ -148,14 +153,32 @@ void CheckLines()
 		}
 		if (full) {
 			ClearLine(r);
+			cellsRemoved += 10;
+			++linesCleared;
 		}
 	}
+	scores += cellsRemoved * linesCleared * level;
+	levelLinesCleared += linesCleared;
+}
+
+void StartNewLevel()
+{
+	frameSkip--;
+	frame = 0;
+	level++;
+	levelLinesCleared = 0;
+	ClearScreen();
+	DropNewFigure();
 }
 
 void DrawInfo()
 {
-	SetConsoleCursorPosition(out, { 30,1 });
+	SetConsoleCursorPosition(out, { 30, 1 });
 	cout << "frame: " << frame % frameSkip << '\t';
+	SetConsoleCursorPosition(out, { 30, 3 });
+	cout << "level: " << level << '\t';
+	SetConsoleCursorPosition(out, { 30, 5 });
+	cout << "score: " << scores << '\t';
 }
 
 int main()
@@ -192,6 +215,9 @@ int main()
 		DrawScreen();
 		DrawFigure(f, rot, x, y);
 		DrawInfo();
+		if (levelLinesCleared >= 10) {
+			StartNewLevel();
+		}
 		Sleep(16);
 		frame++;
 	}
@@ -223,3 +249,9 @@ int main()
  26. ...
  27. Profit!!!
 */
+
+// 1 line: 10 * 1 * 1 * level = 10 points
+// 2 line: 10 * 2 * 2 * level = 40 points
+// 3 line: 10 * 3 * 3 * level = 90 points
+// 4 line: 10 * 4 * 4 * level = 160 points
+
