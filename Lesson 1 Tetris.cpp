@@ -2,9 +2,15 @@
 
 typedef char Body[4][5];
 
+struct Rotation
+{
+	Body body; // 0
+	int x, y; // x 20 y 24
+};
+
 struct Figure
 {
-	Body body[4];
+	Rotation rot[4];
 };
 
 Figure figure[7] = {
@@ -17,7 +23,7 @@ Figure figure[7] = {
 	{ { {"  O","OOO"}, {"O ","O ","OO"}, {"OOO","O  "}, {"OO"," O"," O"} } },	//   O	2
 																				// OOO	
 	
-	{ { {	"OOOO"}, {"O","O","O","O"}, {"OOOO"}, {"O","O","O","O"} } },		// OOOO	3
+	{ { {{"OOOO"},-1,1}, {{"O","O","O","O"}, 1, -1}, {{"OOOO"},-1,1}, {{"O","O","O","O"},1,-1} } },		// OOOO	3
 	
 	{ { {" O ","OOO"}, {"O ","OO","O "}, {"OOO"," O "}, {" O","OO"," O"} } },	//  O	4
 																				// OOO
@@ -60,15 +66,17 @@ void DrawScreen()
 		WriteConsoleA(out, screen[r], 12, 0, 0);
 		//cout << "\t\t" << screen[i] << '\n';
 	}
+	int f = 1;
+	f = 0;
 }
 
 void DrawFigure(int num, int rot, short x, short y)
 {
-	for (int r = 0; r < 4 && figure[num].body[rot][r][0]; r++) {
-		for (int c = 0; c < (int)strlen(figure[num].body[rot][r]); c++) {
-			if (figure[num].body[rot][r][c] == 'O') {
+	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
+			if (figure[num].rot[rot].body[r][c] == 'O') {
 				SetConsoleCursorPosition(out, { short(11 + x + c), short(r + y) });
-				WriteConsoleA(out, &figure[num].body[rot][r][c], 1, 0, 0);
+				WriteConsoleA(out, &figure[num].rot[rot].body[r][c], 1, 0, 0);
 			}
 		}
 	}
@@ -76,10 +84,10 @@ void DrawFigure(int num, int rot, short x, short y)
 
 void PlaceFigure(int num, int rot, short x, short y)
 {
-	for (int r = 0; r < 4 && figure[num].body[rot][r][0]; r++) {
-		for (int c = 0; c < (int)strlen(figure[num].body[rot][r]); c++) {
-			if (figure[num].body[rot][r][c] != ' ') {
-				screen[y + r][x + c + 1] = figure[num].body[rot][r][c];
+	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
+			if (figure[num].rot[rot].body[r][c] != ' ') {
+				screen[y + r][x + c + 1] = figure[num].rot[rot].body[r][c];
 			}
 		}
 	}
@@ -87,9 +95,9 @@ void PlaceFigure(int num, int rot, short x, short y)
 
 int FigureHeight(int f, int rot)
 {
-	return !figure[f].body[rot][1][0] ? 1 :
-		!figure[f].body[rot][2][0] ? 2 :
-		!figure[f].body[rot][3][0] ? 3 :
+	return !figure[f].rot[rot].body[1][0] ? 1 :
+		!figure[f].rot[rot].body[2][0] ? 2 :
+		!figure[f].rot[rot].body[3][0] ? 3 :
 		4;
 }
 
@@ -99,9 +107,9 @@ bool CanPlaceFigure(int num, int rot, int x, int y)
 	if (y >= 10 - FigureHeight(num, rot)) {
 		return false;
 	}
-	for (int r = 0; r < 4 && figure[num].body[rot][r][0]; r++) {
-		for (int c = 0; c < (int)strlen(figure[num].body[rot][r]); c++) {
-			if (figure[num].body[rot][r][c] != ' ' && screen[y + r][x + c + 1] != ' ') {
+	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
+			if (figure[num].rot[rot].body[r][c] != ' ' && screen[y + r][x + c + 1] != ' ') {
 				return false;
 			}
 		}
@@ -130,8 +138,9 @@ void DropNewFigure()
 {
 	f = rand() % 7;
 	rot = 0;
-	x = strlen(figure[f].body[rot][0]) == 2 ? 4 : 3;
+	x = strlen(figure[f].rot[rot].body[0]) == 2 ? 4 : 3;
 	y = 0;
+	f = 3;
 }
 
 void ClearLine(int y)
@@ -186,6 +195,8 @@ void DrawInfo()
 	cout << "level: " << level << '\t';
 	SetConsoleCursorPosition(out, { 30, 5 });
 	cout << "score: " << scores << '\t';
+	SetConsoleCursorPosition(out, { 30, 7 });
+	cout << figure[3].rot[1].x << ' ' << figure[3].rot[1].y << '\t';
 }
 
 int main()
@@ -203,12 +214,21 @@ int main()
 	while (!GetAsyncKeyState(VK_ESCAPE) & 1) {
 		if (GetAsyncKeyState(VK_LEFT) & 1 && CanPlaceFigure(f, rot, x - 1, y)) x--;
 		if (GetAsyncKeyState(VK_RIGHT) & 1 && CanPlaceFigure(f, rot, x + 1, y)) x++;
-		if (GetAsyncKeyState(VK_UP) & 1 && CanPlaceFigure(f, (rot + 1) & 3, x, y)) rot++;
-		if (GetAsyncKeyState('C') & 1 && CanPlaceFigure(f, (rot - 1) & 3, x, y)) rot--;
+		if (GetAsyncKeyState(VK_UP) & 1 && CanPlaceFigure(f, (rot + 1) & 3, x, y)) {
+			rot++;
+			rot &= 3;
+			x += figure[f].rot[rot].x;
+			y += figure[f].rot[rot].y;
+		}
+		if (GetAsyncKeyState('C') & 1 && CanPlaceFigure(f, (rot - 1) & 3, x, y)) {
+			rot--;
+			rot &= 3;
+			x += figure[f].rot[rot].x;
+			y += figure[f].rot[rot].y;
+		}
 		if (GetAsyncKeyState(VK_DOWN) & 1 && CanPlaceFigure(f, rot, x, y + 1)) y++;
 
-		rot &= 3;
-		x = clamp(x, 0, 10 - (int)strlen(figure[f].body[rot][0]));
+		x = clamp(x, 0, 10 - (int)strlen(figure[f].rot[rot].body[0]));
 
 		if (frame % frameSkip == frameSkip - 1) {
 			if (CanPlaceFigure(f, rot, x, y + 1)) {
@@ -226,7 +246,7 @@ int main()
 		if (levelLinesCleared >= 10) {
 			StartNewLevel();
 		}
-		Sleep(16);
+		Sleep(160);
 		frame++;
 	}
 	
