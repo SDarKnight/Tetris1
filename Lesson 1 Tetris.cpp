@@ -23,7 +23,7 @@ Figure figure[7] = {
 	{ { {"  O","OOO"}, {"O ","O ","OO"}, {"OOO","O  "}, {"OO"," O"," O"} } },	//   O	2
 																				// OOO	
 	
-	{ { {{"OOOO"},-1,1}, {{"O","O","O","O"}, 1, -1}, {{"OOOO"},-1,1}, {{"O","O","O","O"},1,-1} } },		// OOOO	3
+	{ { {{"OOOO"},-1,1}, {{"O","O","O","O"}, 2, -1}, {{"OOOO"},-2, 2}, {{"O","O","O","O"},1,-2} } },		// OOOO	3
 	
 	{ { {" O ","OOO"}, {"O ","OO","O "}, {"OOO"," O "}, {" O","OO"," O"} } },	//  O	4
 																				// OOO
@@ -140,7 +140,6 @@ void DropNewFigure()
 	rot = 0;
 	x = strlen(figure[f].rot[rot].body[0]) == 2 ? 4 : 3;
 	y = 0;
-	f = 3;
 }
 
 void ClearLine(int y)
@@ -195,8 +194,14 @@ void DrawInfo()
 	cout << "level: " << level << '\t';
 	SetConsoleCursorPosition(out, { 30, 5 });
 	cout << "score: " << scores << '\t';
-	SetConsoleCursorPosition(out, { 30, 7 });
-	cout << figure[3].rot[1].x << ' ' << figure[3].rot[1].y << '\t';
+}
+
+void FigureRotate(int f, int clockwise)
+{
+	int newRot = (rot + clockwise) & 3;
+	int newX = x + (clockwise > 0 ? figure[f].rot[newRot].x : -figure[f].rot[rot].y);
+	int newY = y + (clockwise > 0 ? figure[f].rot[newRot].y : -figure[f].rot[rot].x);
+	if (CanPlaceFigure(f, newRot, newX, newY)) rot = newRot, x = newX, y = newY;
 }
 
 int main()
@@ -214,18 +219,8 @@ int main()
 	while (!GetAsyncKeyState(VK_ESCAPE) & 1) {
 		if (GetAsyncKeyState(VK_LEFT) & 1 && CanPlaceFigure(f, rot, x - 1, y)) x--;
 		if (GetAsyncKeyState(VK_RIGHT) & 1 && CanPlaceFigure(f, rot, x + 1, y)) x++;
-		if (GetAsyncKeyState(VK_UP) & 1 && CanPlaceFigure(f, (rot + 1) & 3, x, y)) {
-			rot++;
-			rot &= 3;
-			x += figure[f].rot[rot].x;
-			y += figure[f].rot[rot].y;
-		}
-		if (GetAsyncKeyState('C') & 1 && CanPlaceFigure(f, (rot - 1) & 3, x, y)) {
-			rot--;
-			rot &= 3;
-			x += figure[f].rot[rot].x;
-			y += figure[f].rot[rot].y;
-		}
+		if (GetAsyncKeyState(VK_UP) & 1) FigureRotate(f, 1);
+		if (GetAsyncKeyState('C') & 1) FigureRotate(f, -1);
 		if (GetAsyncKeyState(VK_DOWN) & 1 && CanPlaceFigure(f, rot, x, y + 1)) y++;
 
 		x = clamp(x, 0, 10 - (int)strlen(figure[f].rot[rot].body[0]));
@@ -246,7 +241,7 @@ int main()
 		if (levelLinesCleared >= 10) {
 			StartNewLevel();
 		}
-		Sleep(160);
+		Sleep(16);
 		frame++;
 	}
 	
