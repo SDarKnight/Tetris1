@@ -38,14 +38,21 @@ Figure figure[7] = {
 struct Board
 {
 	char* block;
-	int rows = 10, columns = 13;
-	Board(int rows, int columns) :rows(rows), columns(columns)
+	int rows = 10, columns = 13, size;
+	Board(int rows, int columns) :rows(rows), columns(columns), size(rows*columns)
 	{
 		block = new char[rows*columns];
+		Clear();
 	}
 	~Board()
 	{
 		delete[] block;
+	}
+	void Clear()
+	{
+		for (int b = 0; b < size; b++) {
+			block[b] = ' ';
+		}
 	}
 };
 
@@ -76,11 +83,14 @@ HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
 void DrawScreen()
 {
-	for (short r = 0; r < 10; r++) {
+	for (short r = 0; r < p1.rows; r++) {
 		SetConsoleCursorPosition(out, { 10,r });
-		WriteConsoleA(out, screen[r], 12, 0, 0);
-		//cout << "\t\t" << screen[i] << '\n';
+		WriteConsoleA(out, "|", 1, 0, 0);
+		WriteConsoleA(out, &p1.block[r * p1.columns], p1.columns, 0, 0);
+		WriteConsoleA(out, "|", 1, 0, 0);
 	}
+	SetConsoleCursorPosition(out, { 10, (short)p1.rows });
+	for( int c = 0; c < p1.columns + 2; c++) WriteConsoleA(out, "-", 1, 0, 0);
 	int f = 1;
 	f = 0;
 }
@@ -124,21 +134,12 @@ bool CanPlaceFigure(int num, int rot, int x, int y)
 	}
 	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
 		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
-			if (figure[num].rot[rot].body[r][c] != ' ' && screen[y + r][x + c + 1] != ' ') {
+			if (figure[num].rot[rot].body[r][c] != ' ' && p1.block[y * p1.columns + x] != ' ') {
 				return false;
 			}
 		}
 	}
 	return true;
-}
-
-void ClearScreen()
-{
-	for (int r = y; r > 0; r--) {
-		for (int c = 1; c < 11; c++) {
-			screen[r][c] = ' ';
-		}
-	}
 }
 
 void CursorOff()
@@ -197,7 +198,7 @@ void StartNewLevel()
 	frame = 0;
 	level++;
 	levelLinesCleared = 0;
-	ClearScreen();
+	p1.Clear();
 	DropNewFigure();
 }
 
