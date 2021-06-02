@@ -14,25 +14,39 @@ struct Figure
 };
 
 Figure figure[7] = {
-	{ { {"OO","OO"}, {"OO","OO"}, {"OO","OO"}, {"OO","OO"} } },					// OO	0
-																				// OO
+	{ { {"OO","OO"}, {"OO","OO"}, {"OO","OO"}, {"OO","OO"} } },										// OO	0
+																									// OO
 	
-	{ { {"O  ","OOO"}, {"OO","O ","O "}, {"OOO","  O"}, {" O"," O","OO"} } },	// O	1
-																				// OOO
+	{ { {"O  ","OOO"}, {{"OO","O ","O "}, 1, 0}, {{"OOO","  O"},-1, 1}, {{" O"," O","OO"},0,-1} } },// O	1
+																									// OOO
 	
-	{ { {"  O","OOO"}, {"O ","O ","OO"}, {"OOO","O  "}, {"OO"," O"," O"} } },	//   O	2
-																				// OOO	
+	{ { {"  O","OOO"}, {{"O ","O ","OO"}, 1, 0}, {{"OOO","O  "},-1, 1}, {{"OO"," O"," O"},0,-1} } },//   O	2
+																									// OOO	
 	
-	{ { {{"OOOO"},-1,1}, {{"O","O","O","O"}, 2, -1}, {{"OOOO"},-2, 2}, {{"O","O","O","O"},1,-2} } },		// OOOO	3
+	{ { {{"OOOO"},-1,1}, {{"O","O","O","O"}, 2, -1}, {{"OOOO"},-2, 2}, {{"O","O","O","O"},1,-2} } },// OOOO	3
 	
-	{ { {" O ","OOO"}, {"O ","OO","O "}, {"OOO"," O "}, {" O","OO"," O"} } },	//  O	4
-																				// OOO
+	{ { {" O ","OOO"}, {{"O ","OO","O "}, 1, 0}, {{"OOO"," O "},-1, 1}, {{" O","OO"," O"},0,-1} } },//  O	4
+																									// OOO
 	
-	{ { {" OO","OO "}, {"O ","OO"," O"}, {" OO","OO "}, {"O ","OO"," O"} } },	//  OO	5
-																				// OO 
+	{ { {" OO","OO "}, {{"O ","OO"," O"}, 1, 0}, {{" OO","OO "},-1, 1}, {{"O ","OO"," O"},0,-1} } },//  OO	5
+																									// OO 
 	
-	{ { {"OO "," OO"}, {" O","OO","O "}, {"OO "," OO"}, {" O","OO","O "} } }	// OO	6
-																				//  OO
+	{ { {"OO "," OO"}, {{" O","OO","O "}, 1, 0}, {{"OO "," OO"},-1, 1}, {{" O","OO","O "},0,-1} } }	// OO	6
+																									//  OO
+};
+
+struct Board
+{
+	char* block;
+	int rows = 10, columns = 13;
+	Board(int rows, int columns) :rows(rows), columns(columns)
+	{
+		block = new char[rows*columns];
+	}
+	~Board()
+	{
+		delete[] block;
+	}
 };
 
 char screen[10][13] = {
@@ -48,6 +62,7 @@ char screen[10][13] = {
 	"------------"  // 9
 };
 
+Board p1(26,13);
 int f;
 int rot;
 int x, y;
@@ -202,6 +217,10 @@ void FigureRotate(int f, int clockwise)
 	int newX = x + (clockwise > 0 ? figure[f].rot[newRot].x : -figure[f].rot[rot].y);
 	int newY = y + (clockwise > 0 ? figure[f].rot[newRot].y : -figure[f].rot[rot].x);
 	if (CanPlaceFigure(f, newRot, newX, newY)) rot = newRot, x = newX, y = newY;
+	else if (CanPlaceFigure(f, newRot, newX+1, newY)) rot = newRot, x = newX+1, y = newY;
+	else if (CanPlaceFigure(f, newRot, newX-1, newY)) rot = newRot, x = newX-1, y = newY;
+	else if (CanPlaceFigure(f, newRot, newX, newY+1)) rot = newRot, x = newX, y = newY+1;
+	else if (CanPlaceFigure(f, newRot, newX, newY-1)) rot = newRot, x = newX, y = newY-1;
 }
 
 int main()
