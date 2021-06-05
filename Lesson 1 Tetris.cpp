@@ -6,11 +6,13 @@ struct Rotation
 {
 	Body body; // 0
 	int x, y; // x 20 y 24
+	char* operator[](int i) { return body[i]; }
 };
 
 struct Figure
 {
 	Rotation rot[4];
+	Rotation& operator[](int i) { return rot[i]; }
 };
 
 Figure figure[7] = {
@@ -38,8 +40,9 @@ Figure figure[7] = {
 struct Board
 {
 	char* block;
-	int rows = 10, columns = 13, size;
-	Board(int rows, int columns) :rows(rows), columns(columns), size(rows*columns)
+	int rows, columns, size;
+	int x, y;
+	Board(int rows, int columns, int x, int y) :rows(rows), columns(columns), size(rows*columns), x(x), y(y)
 	{
 		block = new char[rows*columns];
 		Clear();
@@ -54,22 +57,10 @@ struct Board
 			block[b] = ' ';
 		}
 	}
+	char* operator[](int y) { return &block[y * columns];  }
 };
 
-char screen[10][13] = {
-	"|          |", // 0
-	"|          |", // 1
-	"|          |", // 2
-	"|          |", // 3
-	"|          |", // 4
-	"|          |", // 5
-	"|          |", // 6
-	"|          |", // 7
-	"|          |", // 8
-	"------------"  // 9
-};
-
-Board p1(26,13);
+Board p1(15, 12, 10, 1);
 int f;
 int rot;
 int x, y;
@@ -84,12 +75,12 @@ HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 void DrawScreen()
 {
 	for (short r = 0; r < p1.rows; r++) {
-		SetConsoleCursorPosition(out, { 10,r });
+		SetConsoleCursorPosition(out, COORD(p1.x, p1.y + r));
 		WriteConsoleA(out, "|", 1, 0, 0);
-		WriteConsoleA(out, &p1.block[r * p1.columns], p1.columns, 0, 0);
+		WriteConsoleA(out, p1[r], p1.columns, 0, 0);
 		WriteConsoleA(out, "|", 1, 0, 0);
 	}
-	SetConsoleCursorPosition(out, { 10, (short)p1.rows });
+	SetConsoleCursorPosition(out, COORD(p1.x, p1.y + p1.rows) );
 	for( int c = 0; c < p1.columns + 2; c++) WriteConsoleA(out, "-", 1, 0, 0);
 	int f = 1;
 	f = 0;
@@ -97,11 +88,11 @@ void DrawScreen()
 
 void DrawFigure(int num, int rot, short x, short y)
 {
-	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
-		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
-			if (figure[num].rot[rot].body[r][c] == 'O') {
-				SetConsoleCursorPosition(out, { short(11 + x + c), short(r + y) });
-				WriteConsoleA(out, &figure[num].rot[rot].body[r][c], 1, 0, 0);
+	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
+			if (figure[num][rot][r][c] == 'O') {
+				SetConsoleCursorPosition(out, COORD( p1.x + x + c + 1, p1.y + r + y) );
+				WriteConsoleA(out, &figure[num][rot][r][c], 1, 0, 0);
 			}
 		}
 	}
@@ -109,10 +100,10 @@ void DrawFigure(int num, int rot, short x, short y)
 
 void PlaceFigure(int num, int rot, short x, short y)
 {
-	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
-		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
-			if (figure[num].rot[rot].body[r][c] != ' ') {
-				screen[y + r][x + c + 1] = figure[num].rot[rot].body[r][c];
+	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
+			if (figure[num][rot][r][c] != ' ') {
+				p1[y + r][x + c] = figure[num][rot][r][c];
 			}
 		}
 	}
@@ -120,21 +111,21 @@ void PlaceFigure(int num, int rot, short x, short y)
 
 int FigureHeight(int f, int rot)
 {
-	return !figure[f].rot[rot].body[1][0] ? 1 :
-		!figure[f].rot[rot].body[2][0] ? 2 :
-		!figure[f].rot[rot].body[3][0] ? 3 :
+	return !figure[f][rot][1][0] ? 1 :
+		!figure[f][rot][2][0] ? 2 :
+		!figure[f][rot][3][0] ? 3 :
 		4;
 }
 
 
 bool CanPlaceFigure(int num, int rot, int x, int y)
 {
-	if (y >= 10 - FigureHeight(num, rot)) {
+	if (y > p1.rows - FigureHeight(num, rot)) {
 		return false;
 	}
-	for (int r = 0; r < 4 && figure[num].rot[rot].body[r][0]; r++) {
-		for (int c = 0; c < (int)strlen(figure[num].rot[rot].body[r]); c++) {
-			if (figure[num].rot[rot].body[r][c] != ' ' && p1.block[y * p1.columns + x] != ' ') {
+	for (int r = 0; r < 4 && figure[num][rot][r][0]; r++) {
+		for (int c = 0; c < (int)strlen(figure[num][rot][r]); c++) {
+			if (figure[num][rot][r][c] != ' ' && p1[y + r][x + c] != ' ') {
 				return false;
 			}
 		}
@@ -154,19 +145,19 @@ void DropNewFigure()
 {
 	f = rand() % 7;
 	rot = 0;
-	x = strlen(figure[f].rot[rot].body[0]) == 2 ? 4 : 3;
+	x = strlen(figure[f][rot][0]) == 2 ? 4 : 3;
 	y = 0;
 }
 
 void ClearLine(int y)
 {
 	for (int r = y; r > 0; r--) {
-		for (int c = 1; c < 11; c++) {
-			screen[r][c] = screen[r - 1][c];
+		for (int c = 0; c < p1.columns; c++) {
+			p1[r][c] = p1[r - 1][c];
 		}
 	}
-	for (int c = 1; c < 11; c++) {
-		screen[0][c] = ' ';
+	for (int c = 0; c < p1.columns; c++) {
+		p1[0][c] = ' ';
 	}
 }
 
@@ -174,17 +165,17 @@ void CheckLines()
 {
 	int linesCleared = 0;
 	int cellsRemoved = 0;
-	for (int r = 0; r < 9; r++) {
+	for (int r = 0; r < p1.rows; r++) {
 		bool full = true;
-		for (int c = 1; c < 11; c++) {
-			if (screen[r][c] == ' ') {
+		for (int c = 0; c < p1.columns; c++) {
+			if (p1[r][c] == ' ') {
 				full = false;
 				break;
 			}
 		}
 		if (full) {
 			ClearLine(r);
-			cellsRemoved += 10;
+			cellsRemoved += p1.columns;
 			++linesCleared;
 		}
 	}
@@ -204,11 +195,11 @@ void StartNewLevel()
 
 void DrawInfo()
 {
-	SetConsoleCursorPosition(out, { 30, 1 });
+	SetConsoleCursorPosition(out, COORD(p1.x + p1.columns + 5, p1.y + 1));
 	cout << "frame: " << frame % frameSkip << '\t';
-	SetConsoleCursorPosition(out, { 30, 3 });
+	SetConsoleCursorPosition(out, COORD(p1.x + p1.columns + 5, p1.y + 3));
 	cout << "level: " << level << '\t';
-	SetConsoleCursorPosition(out, { 30, 5 });
+	SetConsoleCursorPosition(out, COORD(p1.x + p1.columns + 5, p1.y + 5));
 	cout << "score: " << scores << '\t';
 }
 
@@ -243,7 +234,7 @@ int main()
 		if (GetAsyncKeyState('C') & 1) FigureRotate(f, -1);
 		if (GetAsyncKeyState(VK_DOWN) & 1 && CanPlaceFigure(f, rot, x, y + 1)) y++;
 
-		x = clamp(x, 0, 10 - (int)strlen(figure[f].rot[rot].body[0]));
+		x = clamp(x, 0, p1.columns - (int)strlen(figure[f][rot][0]));
 
 		if (frame % frameSkip == frameSkip - 1) {
 			if (CanPlaceFigure(f, rot, x, y + 1)) {
@@ -265,8 +256,8 @@ int main()
 		frame++;
 	}
 	
-	SetConsoleCursorPosition(out, { 0,15 });
-	WriteConsoleA(out, "\n", 1, 0, 0);
+	//SetConsoleCursorPosition(out, { 0,15 });
+	//WriteConsoleA(out, "\n", 1, 0, 0);
     return 0;
 }
 
