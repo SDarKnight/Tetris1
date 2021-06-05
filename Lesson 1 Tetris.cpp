@@ -9,6 +9,7 @@ struct Rotation
 	Body body; // 0
 	int x, y; // x 20 y 24
 	char* operator[](int i) { return body[i]; }
+	int Height(){ return !body[1][0] ? 1 : !body[2][0] ? 2 : !body[3][0] ? 3 : 4; }
 };
 
 struct FigureType
@@ -44,7 +45,6 @@ struct Figure
 	bool CanPlace(int rot, int x, int y);
 	bool Move(int dx, int dy);
 	void Rotate(int clockwise);
-	int Height();
 	void Drop();
 };
 
@@ -58,8 +58,9 @@ struct Board
 	int scores = 0;
 	int level = 1;
 	int levelLinesCleared = 0;
+	int left, right, down, rotateLeft, rotateRight;
 	Figure figure;
-	Board(int rows, int columns, int x, int y);
+	Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight);
 	~Board();
 	char* operator[](int y) { return &block[y * columns]; }
 	void Clear();
@@ -68,38 +69,42 @@ struct Board
 	void CheckLines();
 	void StartNewLevel();
 	void DrawInfo();
+	void Play();
 };
 
 Figure::Figure(Board& board): board(board) {}
 void Figure::Draw()
 {
-	for (int r = 0; r < 4 && FigureType::types[type][rot][r][0]; r++) {
-		for (int c = 0; c < (int)strlen(FigureType::types[type][rot][r]); c++) {
-			if (FigureType::types[type][rot][r][c] == 'O') {
+	auto& f = FigureType::types[type][rot];
+	for (int r = 0; r < 4 && f[r][0]; r++) {
+		for (int c = 0; c < (int)strlen(f[r]); c++) {
+			if (f[r][c] == 'O') {
 				SetConsoleCursorPosition(out, COORD(board.x + x + c + 1, board.y + r + y));
-				WriteConsoleA(out, &FigureType::types[type][rot][r][c], 1, 0, 0);
+				WriteConsoleA(out, &f[r][c], 1, 0, 0);
 			}
 		}
 	}
 }
 void Figure::Place()
 {
-	for (int r = 0; r < 4 && FigureType::types[type][rot][r][0]; r++) {
-		for (int c = 0; c < (int)strlen(FigureType::types[type][rot][r]); c++) {
-			if (FigureType::types[type][rot][r][c] != ' ') {
-				board[y + r][x + c] = FigureType::types[type][rot][r][c];
+	auto& f = FigureType::types[type][rot];
+	for (int r = 0; r < 4 && f[r][0]; r++) {
+		for (int c = 0; c < (int)strlen(f[r]); c++) {
+			if (f[r][c] != ' ') {
+				board[y + r][x + c] = f[r][c];
 			}
 		}
 	}
 }
 bool Figure::CanPlace(int rot, int x, int y)
 {
-	if (y > board.rows - Height()) {
+	auto& f = FigureType::types[type][rot];
+	if (y > board.rows - f.Height()) {
 		return false;
 	}
-	for (int r = 0; r < 4 && FigureType::types[type][rot][r][0]; r++) {
-		for (int c = 0; c < (int)strlen(FigureType::types[type][rot][r]); c++) {
-			if (FigureType::types[type][rot][r][c] != ' ' && board[y + r][x + c] != ' ') {
+	for (int r = 0; r < 4 && f[r][0]; r++) {
+		for (int c = 0; c < (int)strlen(f[r]); c++) {
+			if (f[r][c] != ' ' && board[y + r][x + c] != ' ') {
 				return false;
 			}
 		}
@@ -119,20 +124,15 @@ bool Figure::Move(int dx, int dy)
 void Figure::Rotate(int clockwise)
 {
 	int newRot = (rot + clockwise) & 3;
-	int newX = x + (clockwise > 0 ? FigureType::types[type][newRot].x : -FigureType::types[type][rot].y);
-	int newY = y + (clockwise > 0 ? FigureType::types[type][newRot].y : -FigureType::types[type][rot].x);
+	auto& f = FigureType::types[type][newRot];
+	int newX = x + (clockwise > 0 ? f.x : -f.y);
+	int newY = y + (clockwise > 0 ? f.y : -f.x);
 	if (CanPlace(newRot, newX, newY)) rot = newRot, x = newX, y = newY;
 	else if (CanPlace(newRot, newX + 1, newY)) rot = newRot, x = newX + 1, y = newY;
 	else if (CanPlace(newRot, newX - 1, newY)) rot = newRot, x = newX - 1, y = newY;
 	else if (CanPlace(newRot, newX, newY + 1)) rot = newRot, x = newX, y = newY + 1;
 	else if (CanPlace(newRot, newX, newY - 1)) rot = newRot, x = newX, y = newY - 1;
-}
-int Figure::Height()
-{
-	return !FigureType::types[type][rot][1][0] ? 1 :
-		!FigureType::types[type][rot][2][0] ? 2 :
-		!FigureType::types[type][rot][3][0] ? 3 :
-		4;
+	x = clamp(x, 0, board.columns - (int)strlen(f[0]));
 }
 void Figure::Drop()
 {
@@ -142,8 +142,9 @@ void Figure::Drop()
 	y = 0;
 }
 
-Board::Board(int rows, int columns, int x, int y)
-	:rows(rows), columns(columns), size(rows* columns), x(x), y(y), figure(*this)
+Board::Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight)
+	:rows(rows), columns(columns), size(rows* columns), x(x), y(y), figure(*this),
+	left(left), right(right), down(down), rotateLeft(rotateLeft), rotateRight(rotateRight)
 {
 	block = new char[size];
 	Clear();
@@ -221,6 +222,29 @@ void Board::DrawInfo()
 	SetConsoleCursorPosition(out, COORD(x + columns + 5, y + 5));
 	cout << "score: " << scores << '\t';
 }
+void Board::Play()
+{
+	if (GetAsyncKeyState(left) & 1) figure.Move(-1, 0);
+	if (GetAsyncKeyState(right) & 1) figure.Move(1, 0);
+	if (GetAsyncKeyState(rotateRight) & 1) figure.Rotate(1);
+	if (GetAsyncKeyState(rotateLeft) & 1) figure.Rotate(-1);
+	if (GetAsyncKeyState(down) & 1) figure.Move(0, 1);
+
+	if (frame % frameSkip == frameSkip - 1) {
+		if (!figure.Move(0, 1)) {
+			figure.Place();
+			figure.Drop();
+		}
+	}
+	CheckLines();
+	Draw();
+	DrawInfo();
+	if (levelLinesCleared >= 10) {
+		StartNewLevel();
+	}
+	frame++;
+
+}
 
 void CursorOff()
 {
@@ -234,29 +258,15 @@ int main()
 {
 	CursorOff();
 	srand((int)time(0));
-	Board p1(15, 12, 10, 1);
-	//Board p2(15, 12, 30, 1);
+	Board players[] = { 
+		{15, 12, 2, 1, VK_LEFT, VK_RIGHT, VK_DOWN, VK_RCONTROL, VK_UP},
+		{15, 12, 32, 1, 'A', 'D', 'S', VK_LCONTROL, 'W'}
+	};
 	while (!GetAsyncKeyState(VK_ESCAPE) & 1) {
-		if (GetAsyncKeyState(VK_LEFT) & 1 ) p1.figure.Move(-1, 0);
-		if (GetAsyncKeyState(VK_RIGHT) & 1 ) p1.figure.Move(1, 0);
-		if (GetAsyncKeyState(VK_UP) & 1) p1.figure.Rotate(1);
-		if (GetAsyncKeyState('C') & 1) p1.figure.Rotate(-1);
-		if (GetAsyncKeyState(VK_DOWN) & 1 ) p1.figure.Move(0, 1);
-
-		if (p1.frame % p1.frameSkip == p1.frameSkip - 1) {
-			if( ! p1.figure.Move(0, 1) ){
-				p1.figure.Place();
-				p1.figure.Drop();
-			}
-		}
-		p1.CheckLines();
-		p1.Draw();
-		p1.DrawInfo();
-		if (p1.levelLinesCleared >= 10) {
-			p1.StartNewLevel();
+		for (auto& p : players) {
+			p.Play();
 		}
 		Sleep(16);
-		p1.frame++;
 	}
 	
 	//SetConsoleCursorPosition(out, { 0,15 });
