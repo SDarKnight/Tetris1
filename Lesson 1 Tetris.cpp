@@ -58,10 +58,10 @@ struct Board
 	int scores = 0;
 	int level = 1;
 	int levelLinesCleared = 0;
-	int left, right, down, rotateLeft, rotateRight;
+	int left, right, down, rotateLeft, rotateRight, hardDrop;
 	Figure figure;
-	Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight);
 	~Board();
+	Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight, int hardDrop);
 	char* operator[](int y) { return &block[y * columns]; }
 	void Clear();
 	void Draw();
@@ -130,8 +130,8 @@ void Figure::Rotate(int clockwise)
 	if (CanPlace(newRot, newX, newY)) rot = newRot, x = newX, y = newY;
 	else if (CanPlace(newRot, newX + 1, newY)) rot = newRot, x = newX + 1, y = newY;
 	else if (CanPlace(newRot, newX - 1, newY)) rot = newRot, x = newX - 1, y = newY;
-	else if (CanPlace(newRot, newX, newY + 1)) rot = newRot, x = newX, y = newY + 1;
-	else if (CanPlace(newRot, newX, newY - 1)) rot = newRot, x = newX, y = newY - 1;
+	//else if (CanPlace(newRot, newX, newY + 1)) rot = newRot, x = newX, y = newY + 1;
+	//else if (CanPlace(newRot, newX, newY - 1)) rot = newRot, x = newX, y = newY - 1;
 	x = clamp(x, 0, board.columns - (int)strlen(f[0]));
 }
 void Figure::Drop()
@@ -142,9 +142,9 @@ void Figure::Drop()
 	y = 0;
 }
 
-Board::Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight)
+Board::Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight, int hardDrop)
 	:rows(rows), columns(columns), size(rows* columns), x(x), y(y), figure(*this),
-	left(left), right(right), down(down), rotateLeft(rotateLeft), rotateRight(rotateRight)
+	left(left), right(right), down(down), rotateLeft(rotateLeft), rotateRight(rotateRight), hardDrop(hardDrop)
 {
 	block = new char[size];
 	Clear();
@@ -224,11 +224,12 @@ void Board::DrawInfo()
 }
 void Board::Play()
 {
-	if (GetAsyncKeyState(left) & 1) figure.Move(-1, 0);
-	if (GetAsyncKeyState(right) & 1) figure.Move(1, 0);
-	if (GetAsyncKeyState(rotateRight) & 1) figure.Rotate(1);
-	if (GetAsyncKeyState(rotateLeft) & 1) figure.Rotate(-1);
-	if (GetAsyncKeyState(down) & 1) figure.Move(0, 1);
+	if (GetAsyncKeyState(left) < 0) figure.Move(-1, 0);
+	if (GetAsyncKeyState(right) < 0) figure.Move(1, 0);
+	if (GetAsyncKeyState(rotateRight) < 0) figure.Rotate(1);
+	if (GetAsyncKeyState(rotateLeft) < 0) figure.Rotate(-1);
+	if (GetAsyncKeyState(down) < 0) figure.Move(0, 1);
+	if (GetAsyncKeyState(hardDrop) < 0) { while (figure.Move(0, 1)); figure.Place(); }
 
 	if (frame % frameSkip == frameSkip - 1) {
 		if (!figure.Move(0, 1)) {
@@ -243,7 +244,6 @@ void Board::Play()
 		StartNewLevel();
 	}
 	frame++;
-
 }
 
 void CursorOff()
@@ -259,10 +259,10 @@ int main()
 	CursorOff();
 	srand((int)time(0));
 	Board players[] = { 
-		{15, 12, 2, 1, VK_LEFT, VK_RIGHT, VK_DOWN, VK_RCONTROL, VK_UP},
-		{15, 12, 32, 1, 'A', 'D', 'S', VK_LCONTROL, 'W'}
+		{15, 12, 2, 1,'A', 'D', 'S', VK_LCONTROL, 'W', VK_SPACE},
+		{15, 12, 32, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, VK_RCONTROL, VK_UP, VK_RETURN}
 	};
-	while (!GetAsyncKeyState(VK_ESCAPE) & 1) {
+	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		for (auto& p : players) {
 			p.Play();
 		}
