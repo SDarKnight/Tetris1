@@ -35,6 +35,19 @@ FigureType FigureType::types[7]	= {
 	{ { {"OO "," OO"}, {{" O","OO","O "}, 1, 0}, {{"OO "," OO"},-1, 1}, {{" O","OO","O "},0,-1} } }	// OO	6
 	};
 
+struct Control
+{
+	int code;
+	int press;
+	int delay;
+	Control(int code, int delay = 5): code(code), delay(delay), press(0) {}
+	operator bool()
+	{ 
+		press = GetAsyncKeyState(code) < 0 ? press + 1 : 0;
+		return press == 1 || delay && press > delay;
+	}
+};
+
 struct Figure
 {
 	int type, rot, x, y;
@@ -58,10 +71,10 @@ struct Board
 	int scores = 0;
 	int level = 1;
 	int levelLinesCleared = 0;
-	int left, right, down, rotateLeft, rotateRight, hardDrop;
+	Control left, right, down, rotateLeft, rotateRight, hardDrop;
 	Figure figure;
 	~Board();
-	Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight, int hardDrop);
+	Board(int rows, int columns, int x, int y, Control left, Control right, Control down, Control rotateLeft, Control rotateRight, Control hardDrop);
 	char* operator[](int y) { return &block[y * columns]; }
 	void Clear();
 	void Draw();
@@ -142,7 +155,7 @@ void Figure::Drop()
 	y = 0;
 }
 
-Board::Board(int rows, int columns, int x, int y, int left, int right, int down, int rotateLeft, int rotateRight, int hardDrop)
+Board::Board(int rows, int columns, int x, int y, Control left, Control right, Control down, Control rotateLeft, Control rotateRight, Control hardDrop)
 	:rows(rows), columns(columns), size(rows* columns), x(x), y(y), figure(*this),
 	left(left), right(right), down(down), rotateLeft(rotateLeft), rotateRight(rotateRight), hardDrop(hardDrop)
 {
@@ -224,12 +237,16 @@ void Board::DrawInfo()
 }
 void Board::Play()
 {
-	if (GetAsyncKeyState(left) < 0) figure.Move(-1, 0);
-	if (GetAsyncKeyState(right) < 0) figure.Move(1, 0);
-	if (GetAsyncKeyState(rotateRight) < 0) figure.Rotate(1);
-	if (GetAsyncKeyState(rotateLeft) < 0) figure.Rotate(-1);
-	if (GetAsyncKeyState(down) < 0) figure.Move(0, 1);
-	if (GetAsyncKeyState(hardDrop) < 0) { while (figure.Move(0, 1)); figure.Place(); }
+	if (left) figure.Move(-1, 0);
+	if (right) figure.Move(1, 0);
+	if (rotateRight) figure.Rotate(1);
+	if (rotateLeft) figure.Rotate(-1);
+	if (down) figure.Move(0, 1);
+	if (hardDrop) {
+		while (figure.Move(0, 1));
+		figure.Place();
+		figure.Drop();
+	}
 
 	if (frame % frameSkip == frameSkip - 1) {
 		if (!figure.Move(0, 1)) {
@@ -254,14 +271,15 @@ void CursorOff()
 	SetConsoleCursorInfo(out, &cursorInfo);
 }
 
+Board players[] = {
+	{15, 12, 2, 1,'A', 'D', 'S', {VK_LCONTROL,0}, {'W',0}, {VK_SPACE,0}},
+	{15, 12, 32, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
+};
+
 int main()
 {
 	CursorOff();
 	srand((int)time(0));
-	Board players[] = { 
-		{15, 12, 2, 1,'A', 'D', 'S', VK_LCONTROL, 'W', VK_SPACE},
-		{15, 12, 32, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, VK_RCONTROL, VK_UP, VK_RETURN}
-	};
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		for (auto& p : players) {
 			p.Play();
