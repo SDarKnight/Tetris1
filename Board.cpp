@@ -4,7 +4,7 @@ Board::Board(int rows, int columns, int x, int y, Control left, Control right, C
 	:rows(rows), columns(columns), size(rows* columns), x(x), y(y), figure(*this),
 	left(left), right(right), down(down), rotateLeft(rotateLeft), rotateRight(rotateRight), hardDrop(hardDrop)
 {
-	block = new char[size];
+	block = new Block[size];
 	Clear();
 	figure.Drop();
 }
@@ -48,7 +48,7 @@ void Board::CheckLines()
 	for (int r = 0; r < rows; r++) {
 		bool full = true;
 		for (int c = 0; c < columns; c++) {
-			if ((*this)[r][c] == ' ') {
+			if ((*this)[r][c].c == ' ') {
 				full = false;
 				break;
 			}

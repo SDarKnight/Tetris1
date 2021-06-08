@@ -1,18 +1,41 @@
-typedef char Body[4][5];
+struct Block
+{
+	char c;
+	Block(char c = 0) : c(c) {}
+};
 
 struct Rotation
 {
-	Body body; // 0
+	Block block[4][4]; // 0
 	int x, y; // x 20 y 24
-	char* operator[](int i) { return body[i]; }
-	int Height() { return !body[1][0] ? 1 : !body[2][0] ? 2 : !body[3][0] ? 3 : 4; }
+	int height, width;
+	Block* operator[](int i) { return block[i]; }
+	Rotation(const char* lines, int x = 0, int y = 0) : x(x), y(y)
+	{
+		int l = 0, maxB = 0;
+		for (; l < 4 && *lines; l++) {
+			int b = 0;
+			for (; b < 4 && *lines && *lines != '\n'; b++) {
+				block[l][b] = *lines++;
+			}
+			if (b > maxB) maxB = b;
+			for (; b < 4; b++) {
+				block[l][b] = 0;
+			}
+			if (*lines == '\n') {
+				lines++;
+			}
+		}
+		height = l;
+		width = maxB;
+	}
 };
 
 struct FigureType
 {
 	Rotation rot[4];
 	Rotation& operator[](int i) { return rot[i]; }
-	static FigureType types[7];
+	static FigureType types[];
 };
 
 struct Figure

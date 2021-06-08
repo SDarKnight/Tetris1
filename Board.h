@@ -13,7 +13,7 @@ struct Control
 
 struct Board
 {
-	char* block;
+	Block* block;
 	int rows, columns, size;
 	int x, y;
 	int frame = 0;
@@ -25,7 +25,7 @@ struct Board
 	Figure figure;
 	~Board();
 	Board(int rows, int columns, int x, int y, Control left, Control right, Control down, Control rotateLeft, Control rotateRight, Control hardDrop);
-	char* operator[](int y) { return &block[y * columns]; }
+	Block* operator[](int y) { return &block[y * columns]; }
 	void Clear();
 	void Draw();
 	void ClearLine(int y);
