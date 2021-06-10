@@ -10,25 +10,7 @@ struct Rotation
 	int x, y; // x 20 y 24
 	int height, width;
 	Block* operator[](int i) { return block[i]; }
-	Rotation(const char* lines, int x = 0, int y = 0) : x(x), y(y)
-	{
-		int l = 0, maxB = 0;
-		for (; l < 4 && *lines; l++) {
-			int b = 0;
-			for (; b < 4 && *lines && *lines != '\n'; b++) {
-				block[l][b] = *lines++;
-			}
-			if (b > maxB) maxB = b;
-			for (; b < 4; b++) {
-				block[l][b] = 0;
-			}
-			if (*lines == '\n') {
-				lines++;
-			}
-		}
-		height = l;
-		width = maxB;
-	}
+	Rotation(const char* line, int x = 0, int y = 0);
 };
 
 struct FigureType

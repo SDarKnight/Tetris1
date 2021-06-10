@@ -1,14 +1,14 @@
 #include "pch.h"
 
 FigureType FigureType::types[] = {
-	{ "OO\nOO", "OO\nOO", "OO\nOO", "OO\nOO"},												// OO	0
+	{ "OO\nOO", "OO\nOO", "OO\nOO", "OO\nOO" },												// OO	0
 																							// OO
 	{ "O\nOOO", {"OO\nO\nO", 1, 0}, {"OOO\n  O",-1, 1}, {" O\n O\nOO",0,-1} },				// O	1
 																							// OOO
 	{ "  O\nOOO", {"O \nO \nOO", 1, 0}, {"OOO\nO",-1, 1}, {"OO\n O\n O",0,-1} },			//   O	2
 																							// OOO	
-	{ Rotation{"OOOO",-1,1}, {"O\nO\nO\nO", 2, -1}, {"OOOO",-2, 2}, {"O\nO\nO\nO",1,-2} },	// OOOO	3
-	{ Rotation{"OOOO",-1,1}, {"O\nO\nO\nO", 2, -1}, {"OOOO",-2, 2}, {"O\nO\nO\nO",1,-2} },	// OOOO	3
+	{ { {"OOOO",-1,1}, {"O\nO\nO\nO", 2, -1}, {"OOOO",-2, 2}, {"O\nO\nO\nO",1,-2} } },	// OOOO	3
+	{ { {"OOOO",-1,1}, {"O\nO\nO\nO", 2, -1}, {"OOOO",-2, 2}, {"O\nO\nO\nO",1,-2} } },	// OOOO	3
 	{ " O\nOOO", {"O\nOO\nO ", 1, 0}, {"OOO\n O ",-1, 1}, {" O\nOO\n O",0,-1} },			//  O	4
 																							// OOO
 	{ " OO\nOO ", {"O\nOO\n O", 1, 0}, {" OO\nOO ",-1, 1}, {"O\nOO\n O",0,-1} },			//  OO	5
@@ -16,6 +16,26 @@ FigureType FigureType::types[] = {
 	{ "OO\n OO", {" O\nOO\nO ", 1, 0}, {"OO\n OO",-1, 1}, {" O\nOO\nO",0,-1} }				// OO	6
 																							//  OO
 };
+
+Rotation::Rotation(const char* line, int x, int y) : x(x), y(y)
+{
+	int l = 0, maxBlocksInLine = 0;
+	for (; l < 4 && *line; l++) {
+		int b = 0;
+		for (; b < 4 && *line && *line != '\n'; b++) {
+			block[l][b] = *line++;
+		}
+		if (b > maxBlocksInLine) maxBlocksInLine = b;
+		for (; b < 4; b++) {
+			block[l][b] = 0;
+		}
+		if (*line == '\n') {
+			line++;
+		}
+	}
+	height = l;
+	width = maxBlocksInLine;
+}
 
 Figure::Figure(Board& board) : board(board) {}
 
