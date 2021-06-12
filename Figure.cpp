@@ -29,7 +29,7 @@ void Figure::Draw()
 {
 	auto& f = types[type][rot];
 	for (int r = 0; r < 4 && f[r][0].c; r++) {
-		for (int c = 0; c < 4 && f[r][c].c; c++) {
+		if (r + y >= 0) for (int c = 0; c < 4 && f[r][c].c; c++) {
 			if (f[r][c].c == 'O') {
 				SetConsoleCursorPosition(out, COORD(board.x + x + c + 1, board.y + r + y));
 				WriteConsoleA(out, &f[r][c], 1, 0, 0);
@@ -56,7 +56,7 @@ bool Figure::CanPlace(int rot, int x, int y)
 	}
 	for (int r = 0; r < 4 && f[r][0].c; r++) {
 		for (int c = 0; c < 4 && f[r][c].c; c++) {
-			if (f[r][c].c != ' ' && board[y + r][x + c].c != ' ') {
+			if (y + r >= 0 && f[r][c].c != ' ' && board[y + r][x + c].c != ' ') {
 				return false;
 			}
 		}
