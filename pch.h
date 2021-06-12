@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <immintrin.h>
 
 using namespace std;
 

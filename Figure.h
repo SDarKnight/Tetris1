@@ -13,13 +13,6 @@ struct Rotation
 	Rotation(const char* line, int x = 0, int y = 0);
 };
 
-struct FigureType
-{
-	Rotation rot[4];
-	Rotation& operator[](int i) { return rot[i]; }
-	static FigureType types[];
-};
-
 struct Figure
 {
 	int type, rot, x, y;
@@ -31,4 +24,6 @@ struct Figure
 	bool Move(int dx, int dy);
 	void Rotate(int clockwise);
 	void Drop();
+	static Rotation types[][4];
+	static const int figures;
 };
