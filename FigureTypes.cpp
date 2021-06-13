@@ -104,7 +104,28 @@ Rotation Figure::types[][4] = {
 						 O
 						OO
 						O
-	)",0,-1} }				// 7
+	)",0,-1} },				// 7
+	//{ R"(
+	//					OOOO
+	//					O
+	//					O
+	//					O
+	//)", R"(
+	//					OOOO
+	//					   O
+	//					   O
+	//					   O
+	//)", R"(
+	//					   O
+	//					   O
+	//					   O
+	//					OOOO
+	//)", R"(
+	//					O
+	//					O
+	//					O
+	//					OOOO
+	//)" },			// 8
 };
 
 const int Figure::figures = _countof(types);

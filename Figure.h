@@ -2,6 +2,9 @@ struct Block
 {
 	char c;
 	Block(char c = 0) : c(c) {}
+	void Draw(int x, int y);
+	void Place(Block& b);
+	explicit operator bool() { return c; }
 };
 
 struct Rotation
@@ -24,6 +27,7 @@ struct Figure
 	bool Move(int dx, int dy);
 	void Rotate(int clockwise);
 	void Drop();
+	Block* BlockInBoard(int x, int y);
 	static Rotation types[][4];
 	static const int figures;
 };

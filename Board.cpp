@@ -15,20 +15,22 @@ Board::~Board()
 void Board::Clear()
 {
 	for (int b = 0; b < size; b++) {
-		block[b] = ' ';
+		block[b] = 0;
 	}
 }
 void Board::Draw()
 {
-	for (short r = 0; r < rows; r++) {
-		SetConsoleCursorPosition(out, COORD(x, y + r));
-		WriteConsoleA(out, "|", 1, 0, 0);
-		WriteConsoleA(out, (*this)[r], columns, 0, 0);
-		WriteConsoleA(out, "|", 1, 0, 0);
+	for (int r = 0; r < rows; r++) {
+		Block('|').Draw(x, y + r);
+		for (int c = 0; c < columns; c++) {
+			Block& b = (*this)[r][c];
+			Block* f;
+			(b ? b : (f = figure.BlockInBoard(c,r)) ? *f : Block(' ')).Draw(x + c + 1, y + r);
+		}
+		Block('|').Draw(x + columns + 1, y + r);
 	}
-	SetConsoleCursorPosition(out, COORD(x, y + rows));
-	for (int c = 0; c < columns + 2; c++) WriteConsoleA(out, "-", 1, 0, 0);
-	figure.Draw();
+	for (int c = 0; c < columns + 2; c++) Block('-').Draw(x + c, y + rows);
+	//figure.Draw();
 }
 void Board::ClearLine(int y)
 {
@@ -38,7 +40,7 @@ void Board::ClearLine(int y)
 		}
 	}
 	for (int c = 0; c < columns; c++) {
-		(*this)[0][c] = ' ';
+		(*this)[0][c] = 0;
 	}
 }
 void Board::CheckLines()
@@ -48,7 +50,7 @@ void Board::CheckLines()
 	for (int r = 0; r < rows; r++) {
 		bool full = true;
 		for (int c = 0; c < columns; c++) {
-			if ((*this)[r][c].c == ' ') {
+			if( ! (*this)[r][c] ) {
 				full = false;
 				break;
 			}
@@ -73,12 +75,13 @@ void Board::StartNewLevel()
 }
 void Board::DrawInfo()
 {
-	SetConsoleCursorPosition(out, COORD(x + columns + 5, y + 1));
-	cout << "frame: " << frame % frameSkip << '\t';
-	SetConsoleCursorPosition(out, COORD(x + columns + 5, y + 3));
-	cout << "level: " << level << '\t';
-	SetConsoleCursorPosition(out, COORD(x + columns + 5, y + 5));
-	cout << "score: " << scores << '\t';
+	char s[256];
+	sprintf_s(s, "frame: %d   ", frame % frameSkip);
+	Screen::cur->Draw(x + columns + 5, y + 1, s);
+	sprintf_s(s, "level: %d   ", level);
+	Screen::cur->Draw(x + columns + 5, y + 3, s);
+	sprintf_s(s, "score: %d   ", scores);
+	Screen::cur->Draw(x + columns + 5, y + 5, s);
 }
 void Board::Play()
 {
@@ -102,7 +105,7 @@ void Board::Play()
 	CheckLines();
 	Draw();
 	DrawInfo();
-	if (levelLinesCleared >= 10) {
+	if (levelLinesCleared >= 5) {
 		StartNewLevel();
 	}
 	frame++;

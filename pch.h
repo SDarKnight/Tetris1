@@ -1,10 +1,7 @@
-#include <iostream>
-#include <cstdlib>
-#include <string>
 #include <windows.h>
-#include <stdlib.h>
 #include <algorithm>
 #include <immintrin.h>
+//#include <stdlib.h> // for old rand
 
 using namespace std;
 

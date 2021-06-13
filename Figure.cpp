@@ -1,15 +1,26 @@
 #include "pch.h"
 
+void Block::Draw(int x, int y)
+{
+	if( *this ) Screen::cur->Draw(x, y, c);
+}
+
+void Block::Place(Block& b)
+{
+	if (b) *this = b;
+}
+
 Rotation::Rotation(const char* line, int x, int y) : x(x), y(y)
 {
 	int l = 0, maxBlocksInLine = 0;
 	line++;
 	for (; l < 4 && *line; l++) {
 		while (*line == '\t') line++;
-		if (!*line) { l--; break; }
+		if (!*line) break;
 		int b = 0;
 		for (; b < 4 && *line && *line != '\n'; b++) {
-			block[l][b] = *line++;
+			char c = *line++;
+			block[l][b] = c == ' ' ? 0 : c;
 		}
 		if (b > maxBlocksInLine) maxBlocksInLine = b;
 		for (; b < 4; b++) {
@@ -27,24 +38,17 @@ Figure::Figure(Board& board) : board(board) {}
 
 void Figure::Draw()
 {
-	auto& f = types[type][rot];
-	for (int r = 0; r < 4 && f[r][0].c; r++) {
-		if (r + y >= 0) for (int c = 0; c < 4 && f[r][c].c; c++) {
-			if (f[r][c].c == 'O') {
-				SetConsoleCursorPosition(out, COORD(board.x + x + c + 1, board.y + r + y));
-				WriteConsoleA(out, &f[r][c], 1, 0, 0);
-			}
+	for (int r = 0; r < 4; r++) {
+		if (r + y >= 0) for (int c = 0; c < 4; c++) {
+			types[type][rot][r][c].Draw( board.x + x + c + 1, board.y + r + y );
 		}
 	}
 }
 void Figure::Place()
 {
-	auto& f = types[type][rot];
-	for (int r = 0; r < 4 && f[r][0].c; r++) {
-		for (int c = 0; c < 4 && f[r][c].c; c++) {
-			if (f[r][c].c != ' ') {
-				board[y + r][x + c] = f[r][c];
-			}
+	for (int r = 0; r < 4; r++) {
+		for (int c = 0; c < 4; c++) {
+			board[y + r][x + c].Place( types[type][rot][r][c] );
 		}
 	}
 }
@@ -54,9 +58,9 @@ bool Figure::CanPlace(int rot, int x, int y)
 	if (y > board.rows - f.height) {
 		return false;
 	}
-	for (int r = 0; r < 4 && f[r][0].c; r++) {
-		for (int c = 0; c < 4 && f[r][c].c; c++) {
-			if (y + r >= 0 && f[r][c].c != ' ' && board[y + r][x + c].c != ' ') {
+	for (int r = 0; r < 4; r++) {
+		for (int c = 0; c < 4; c++) {
+			if (y + r >= 0 && f[r][c] && board[y + r][x + c]) {
 				return false;
 			}
 		}
@@ -88,11 +92,20 @@ void Figure::Rotate(int clockwise)
 }
 void Figure::Drop()
 {
-	unsigned int random;
-	_rdrand32_step(&random);
+	unsigned short random;
+	if( !_rdseed16_step(&random) ) _rdrand16_step(&random);
 	type = random % figures;
 	//type = rand() % figures;
 	rot = 0;
 	x = types[type][rot].width == 2 ? 4 : 3;
 	y = 0;
+}
+Block* Figure::BlockInBoard(int boardX, int boardY)
+{
+	auto& f = types[type][rot];
+	if (boardX >= x && boardX < x + f.width && boardY >= y && boardY <= y + f.height) {
+		Block& b = f[boardY - y][boardX - x];
+		if (b) return &b;
+	}
+	return 0;
 }
