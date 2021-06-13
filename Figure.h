@@ -1,7 +1,8 @@
 struct Block
 {
 	char c;
-	Block(char c = 0) : c(c) {}
+	int color;
+	Block(char c = 0, int color = 0) : c(c), color(color) {}
 	void Draw(int x, int y);
 	void Place(Block& b);
 	explicit operator bool() { return c; }

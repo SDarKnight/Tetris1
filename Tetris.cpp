@@ -5,9 +5,22 @@ Board players[] = {
 	{15, 12, 32, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
 };
 
+void DrawAsciiTable(int startX, int startY)
+{
+	char buf[16]{ 0 };
+	for (int y = 0; y < 16; y++) {
+		_itoa_s(y * 16, buf, 10);
+		Screen::cur->Draw(startX - 4, startY + y, buf);
+		for (int x = 0; x < 16; x++) {
+			Screen::cur->Draw(startX + x, startY + y, y * 16 + x);
+		}
+	}
+}
+
 int main()
 {
 	//srand((int)time(0));
+	DrawAsciiTable(63, 1);
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		for (auto& p : players) {
 			p.Play();

@@ -11,8 +11,9 @@ TextScreen::TextScreen()
 
 void TextScreen::Draw(short x, short y, char c, int color)
 {
-	SetConsoleCursorPosition(out, { x, y });
-	WriteConsoleA(out, &c, 1, 0, 0);
+	CHAR_INFO ci{ {.AsciiChar = c }, WORD(color ? color : 7) };
+	SMALL_RECT r{ x,y,x,y };
+	WriteConsoleOutputA(out, &ci, { 1, 1 }, { 0, 0 }, &r);
 }
 
 void TextScreen::Draw(short x, short y, const char* c, int color)

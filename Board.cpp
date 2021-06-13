@@ -21,16 +21,18 @@ void Board::Clear()
 void Board::Draw()
 {
 	for (int r = 0; r < rows; r++) {
-		Block('|').Draw(x, y + r);
+		Block('³').Draw(x, y + r);
 		for (int c = 0; c < columns; c++) {
 			Block& b = (*this)[r][c];
 			Block* f;
 			(b ? b : (f = figure.BlockInBoard(c,r)) ? *f : Block(' ')).Draw(x + c + 1, y + r);
 		}
-		Block('|').Draw(x + columns + 1, y + r);
+		Block('³').Draw(x + columns + 1, y + r);
 	}
-	for (int c = 0; c < columns + 2; c++) Block('-').Draw(x + c, y + rows);
-	//figure.Draw();
+	Block('À').Draw(x, y + rows);
+	for (int c = 0; c < columns; c++) Block('Ä').Draw(x + c + 1, y + rows);
+	Block('Ù').Draw(x + columns + 1, y + rows);
+
 }
 void Board::ClearLine(int y)
 {
@@ -76,12 +78,12 @@ void Board::StartNewLevel()
 void Board::DrawInfo()
 {
 	char s[256];
-	sprintf_s(s, "frame: %d   ", frame % frameSkip);
-	Screen::cur->Draw(x + columns + 5, y + 1, s);
-	sprintf_s(s, "level: %d   ", level);
-	Screen::cur->Draw(x + columns + 5, y + 3, s);
+	sprintf_s(s, "frame: %d ", frame % frameSkip);
+	Screen::cur->Draw(x + columns + 4, y + 1, s);
+	sprintf_s(s, "level: %d ", level);
+	Screen::cur->Draw(x + columns + 4, y + 3, s);
 	sprintf_s(s, "score: %d   ", scores);
-	Screen::cur->Draw(x + columns + 5, y + 5, s);
+	Screen::cur->Draw(x + columns + 4, y + 5, s);
 }
 void Board::Play()
 {

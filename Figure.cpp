@@ -2,7 +2,7 @@
 
 void Block::Draw(int x, int y)
 {
-	if( *this ) Screen::cur->Draw(x, y, c);
+	if( *this ) Screen::cur->Draw(x, y, c, color);
 }
 
 void Block::Place(Block& b)
@@ -97,13 +97,13 @@ void Figure::Drop()
 	type = random % figures;
 	//type = rand() % figures;
 	rot = 0;
-	x = types[type][rot].width == 2 ? 4 : 3;
+	x = (board.columns - types[type][rot].width) / 2 ;
 	y = 0;
 }
 Block* Figure::BlockInBoard(int boardX, int boardY)
 {
 	auto& f = types[type][rot];
-	if (boardX >= x && boardX < x + f.width && boardY >= y && boardY <= y + f.height) {
+	if (boardX >= x && boardX < x + f.width && boardY >= y && boardY < y + f.height) {
 		Block& b = f[boardY - y][boardX - x];
 		if (b) return &b;
 	}
