@@ -21,17 +21,17 @@ void Board::Clear()
 void Board::Draw()
 {
 	for (int r = 0; r < rows; r++) {
-		Block('³').Draw(x, y + r);
+		Screen::cur->Draw(x, y + r, '³', 7);
 		for (int c = 0; c < columns; c++) {
 			Block& b = (*this)[r][c];
 			Block* f;
 			(b ? b : (f = figure.BlockInBoard(c,r)) ? *f : Block(' ')).Draw(x + c + 1, y + r);
 		}
-		Block('³').Draw(x + columns + 1, y + r);
+		Screen::cur->Draw(x + columns + 1, y + r, '³', 7);
 	}
-	Block('À').Draw(x, y + rows);
-	for (int c = 0; c < columns; c++) Block('Ä').Draw(x + c + 1, y + rows);
-	Block('Ù').Draw(x + columns + 1, y + rows);
+	Screen::cur->Draw(x, y + rows, 'À', 7);
+	for (int c = 0; c < columns; c++) Screen::cur->Draw(x + c + 1, y + rows, 'Ä', 7);
+	Screen::cur->Draw(x + columns + 1, y + rows, 'Ù', 7);
 
 }
 void Board::ClearLine(int y)

@@ -1,8 +1,7 @@
 struct Block
 {
 	char c;
-	int color;
-	Block(char c = 0, int color = 0) : c(c), color(color) {}
+	Block(char c = 0) : c(c) {}
 	void Draw(int x, int y);
 	void Place(Block& b);
 	explicit operator bool() { return c; }
@@ -15,6 +14,15 @@ struct Rotation
 	int height, width;
 	Block* operator[](int i) { return block[i]; }
 	Rotation(const char* line, int x = 0, int y = 0);
+	Rotation(int color, Rotation& r);
+};
+
+struct Shape
+{
+	int color;
+	Rotation rot[4];
+	Shape(int c, Rotation r0, Rotation r1, Rotation r2, Rotation r3): rot{ {c,r0}, {c,r1}, {c,r2}, {c,r3} } {}
+	Rotation& operator[](int i) { return rot[i]; }
 };
 
 struct Figure
@@ -29,6 +37,6 @@ struct Figure
 	void Rotate(int clockwise);
 	void Drop();
 	Block* BlockInBoard(int x, int y);
-	static Rotation types[][4];
+	static Shape types[];
 	static const int figures;
 };

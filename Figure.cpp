@@ -2,12 +2,17 @@
 
 void Block::Draw(int x, int y)
 {
-	if( *this ) Screen::cur->Draw(x, y, c, color);
+	if( *this ) Screen::cur->Draw(x, y, 'Û', c);
 }
 
 void Block::Place(Block& b)
 {
 	if (b) *this = b;
+}
+
+Rotation::Rotation(int color, Rotation& r): Rotation(r)
+{
+	for (auto& br: block) for (auto& b : br) if (b) b = color;
 }
 
 Rotation::Rotation(const char* line, int x, int y) : x(x), y(y)

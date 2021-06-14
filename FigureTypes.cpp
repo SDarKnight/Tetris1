@@ -1,7 +1,7 @@
 #include "pch.h"
 
-Rotation Figure::types[][4] = {
-	{ R"(
+Shape Figure::types[] = {
+	{ 8, R"(
 						лл
 						лл
 	)", R"(
@@ -14,7 +14,7 @@ Rotation Figure::types[][4] = {
 						лл
 						лл
 	)" },					// 0
-	{ R"(
+	{ 9, R"(
 						л
 						ллл
 	)", {R"(
@@ -29,7 +29,7 @@ Rotation Figure::types[][4] = {
 						 л
 						лл
 	)",0,-1} },				// 1
-	{ R"(
+	{ 10, R"(
 						  л
 						ллл
 	)", {R"(
@@ -44,7 +44,7 @@ Rotation Figure::types[][4] = {
 						 л
 						 л
 	)",0,-1} },				// 2
-	{ {R"(
+	{ 11, {R"(
 						лллл
 	)",-1,1}, {R"(
 						л
@@ -59,8 +59,8 @@ Rotation Figure::types[][4] = {
 						л
 						л
 	)",1,-2} },				// 3
-	{ types[3][0], types[3][1], types[3][2], types[3][3] }, // 4
-	{ R"(
+	{ types[3] }, // 4
+	{ 12, R"(
 						 л
 						ллл
 	)", {R"(
@@ -75,7 +75,7 @@ Rotation Figure::types[][4] = {
 						лл
 						 л
 	)",0,-1} },				// 5
-	{ R"(
+	{ 13, R"(
 						 лл
 						лл
 	)", {R"(
@@ -90,7 +90,7 @@ Rotation Figure::types[][4] = {
 						лл
 						 л
 	)",0,-1} },				// 6
-	{ R"(
+	{ 14, R"(
 						лл
 						 лл
 	)", {R"(
