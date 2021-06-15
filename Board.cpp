@@ -23,8 +23,9 @@ void Board::Draw()
 	for (int r = 0; r < rows; r++) {
 		Screen::cur->Draw(x, y + r, '³', 7);
 		for (int c = 0; c < columns; c++) {
-			Block* f;
-			((f = figure.BlockInBoard(c,r)) ? *f : (*this)[r][c]).Draw(x + c*2 + 1, y + r);
+			bool shadow = false;
+			Block* f = figure.BlockInCell(c, r, shadow);
+			(f ? *f : (*this)[r][c]).Draw(x + c*2 + 1, y + r, shadow);
 		}
 		Screen::cur->Draw(x + columns*2 + 1, y + r, '³', 7);
 	}

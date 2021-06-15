@@ -2,7 +2,7 @@ struct Block
 {
 	char c;
 	Block(char c = 0) : c(c) {}
-	void Draw(int x, int y);
+	void Draw(int x, int y, bool shadow = false);
 	void Place(Block& b);
 	explicit operator bool() { return c; }
 };
@@ -37,7 +37,7 @@ struct Figure
 	bool Move(int dx, int dy);
 	void Rotate(int clockwise);
 	void Drop();
-	Block* BlockInBoard(int x, int y);
+	Block* BlockInCell(int x, int y, bool& shadow);
 	static Shape types[];
 	static const int figures;
 	int Random();

@@ -111,7 +111,7 @@ int main()
 	//return 0;
 	
 	//srand((int)time(0));
-	//DrawAsciiTable(63, 1);
+	//DrawAsciiTable(63, 1); return 0;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		for (auto& p : players) {
 			p.Play();

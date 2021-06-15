@@ -1,10 +1,11 @@
 #include "pch.h"
 
-void Block::Draw(int x, int y)
+void Block::Draw(int x, int y, bool shadow)
 {
 	if (*this) {
-		Screen::cur->Draw(x, y, 'Û', c);
-		Screen::cur->Draw(x+1, y, 'Û', c);
+		int color = c << !shadow * 4;
+		Screen::cur->Draw(x, y, shadow ? '°' : '[', color);
+		Screen::cur->Draw(x+1, y, shadow ? '°' : ']', color);
 	} else {
 		Screen::cur->Draw(x, y, ' ');
 		Screen::cur->Draw(x+1, y, ' ');
@@ -123,14 +124,32 @@ void Figure::Drop()
 	x = (board.columns - types[type][rot].width) / 2 ;
 	y = 0;
 }
-Block* Figure::BlockInBoard(int boardX, int boardY)
+
+Block* Figure::BlockInCell(int boardX, int boardY, bool& shadow)
 {
 	auto& f = types[type][rot];
-	if (boardX >= x && boardX < x + f.width && boardY >= y && boardY < y + f.height) {
-		Block& b = f[boardY - y][boardX - x];
-		if (b) return &b;
+	Block* result = 0;
+	Block* b;
+	auto check = [&]() {
+		return boardX >= x
+			&& boardX <  x + f.width
+			&& boardY >= y
+			&& boardY <  y + f.height
+			&& *(b = &f[boardY - y][boardX - x]); };
+	if( check() ){
+		result = b;
+	}else{
+		int movedY = 0;
+		while(Move(0, 1)) movedY++;
+		if (movedY > 0) {
+			if( check() ){
+				result = b;
+				shadow = true;
+			}
+			y -= movedY;
+		}
 	}
-	return 0;
+	return result;
 }
 
 int Figure::Random()
