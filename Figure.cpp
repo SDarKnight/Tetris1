@@ -2,7 +2,13 @@
 
 void Block::Draw(int x, int y)
 {
-	if( *this ) Screen::cur->Draw(x, y, 'Û', c);
+	if (*this) {
+		Screen::cur->Draw(x, y, 'Û', c);
+		Screen::cur->Draw(x+1, y, 'Û', c);
+	} else {
+		Screen::cur->Draw(x, y, ' ');
+		Screen::cur->Draw(x+1, y, ' ');
+	}
 }
 
 void Block::Place(Block& b)
@@ -55,12 +61,8 @@ void Figure::DrawNext()
 	for (int r = 0; r < 4; r++) {
 		for (int c = 0; c < 4; c++) {
 			Block& b = types[next][0][r][c];
-			int x = board.columns + board.x + 5 + c + 1, y = board.y + r + 10;
-			if (b) {
-				b.Draw(x,y);
-			} else {
-				Screen::cur->Draw(x, y,' ');
-			}
+			int x = board.columns*2 + board.x + 5 + c*2 + 1, y = board.y + r + 10;
+			b.Draw(x,y);
 		}
 	}
 }

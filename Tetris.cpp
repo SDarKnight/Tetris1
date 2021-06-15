@@ -1,8 +1,8 @@
 #include "pch.h"
 
 Board players[] = {
-	{15, 12, 2, 1,'A', 'D', 'S', {VK_LCONTROL,0}, {'W',0}, {VK_SPACE,0}},
-	{15, 12, 32, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
+	{18, 12, 1, 1,'A', 'D', 'S', {VK_LCONTROL,0}, {'W',0}, {VK_SPACE,0}},
+	{18, 12, 42, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
 };
 
 void DrawAsciiTable(int startX, int startY)
@@ -133,7 +133,6 @@ int main()
  9. [Done] Добавить мультиплеер на одном компьютере.
  10. Добавить игровое меню.
  11. Добавить звук в игре.
- 12. Откладывать фигуры.
 
  20. Добавить мультиплеер по сети.
  21. Добавить графический режим.
