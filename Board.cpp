@@ -32,7 +32,7 @@ void Board::Draw()
 	Screen::cur->Draw(x, y + rows, 'À', 7);
 	for (int c = 0; c < columns; c++) Screen::cur->Draw(x + c + 1, y + rows, 'Ä', 7);
 	Screen::cur->Draw(x + columns + 1, y + rows, 'Ù', 7);
-
+	figure.DrawNext();
 }
 void Board::ClearLine(int y)
 {

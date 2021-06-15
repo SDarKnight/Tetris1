@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <immintrin.h>
 //#include <stdlib.h> // for old rand
+#include <iostream>
 
 using namespace std;
 

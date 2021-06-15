@@ -27,10 +27,11 @@ struct Shape
 
 struct Figure
 {
-	int type, rot, x, y;
+	int type, next, rot, x, y;
 	struct Board& board;
 	Figure(Board& board);
 	void Draw();
+	void DrawNext();
 	void Place();
 	bool CanPlace(int rot, int x, int y);
 	bool Move(int dx, int dy);
@@ -39,4 +40,5 @@ struct Figure
 	Block* BlockInBoard(int x, int y);
 	static Shape types[];
 	static const int figures;
+	int Random();
 };

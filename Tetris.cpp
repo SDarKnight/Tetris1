@@ -17,10 +17,101 @@ void DrawAsciiTable(int startX, int startY)
 	}
 }
 
+//int* a = new int;
+//int b = 3;
+//int& c = b;
+//c = 6;
+//cout << *a;
+//cout << c;
+//cout << b;
+
+//void add(int& b)
+//{
+//	b += 3;
+//}
+//
+//int b = 1;
+//add(b);
+//cout << b; // 4
+//
+//a = &b;
+//b = 4;
+//*a = 5;
+//cout << b; // 5
+//cout << *a; // 5
+//delete a;
+
+//struct List
+//{
+//	List* next;
+//	int value;
+//};
+
+//int a = 1;
+//int b = 2;
+//int m[1000] = { 0 };
+//
+//void incReference(int& a)
+//{
+//	a++;
+//}
+//
+//void incPointer(int* a)
+//{
+//	(*a)++;
+//}
+//
+//int incValue(int a)
+//{
+//	a++;
+//	return a;
+//}
+
+//char h[] = "Hello !";
+
 int main()
 {
+	//*(int*)0 = 1;
+	//*1 = 2;
+
+	//*(short*)(4337666) = 'rr';
+	//*h = 'M';
+
+	//cout << h << endl;
+	
+	//int ar[5];
+	//for (int i = 0; i <= 4; i++) {
+	//	cin >> ar[i];
+	//}
+	//for (int i = 4; i >= 0; i--) {
+	//	cout << ar[i] << ' ';
+	//}
+
+	//int bv = 123;
+	//int& b = *new int(123);
+	////b = new int;
+	//bv++;
+	//b++;
+	//int* a = &b;
+	//&b;
+	//
+	//int* a = new int(123);
+	//a = new int;
+	//a++;
+	//*a;
+	//int** c = &a;
+	//**c = 3;
+	//
+	//a = incValue(a);
+	//incPointer(&a);
+	//incReference(a);
+	//
+	//cout << a << endl;
+
+	//return 0;
+	
 	//srand((int)time(0));
-	DrawAsciiTable(63, 1);
+	//DrawAsciiTable(63, 1);
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		for (auto& p : players) {
 			p.Play();
@@ -34,7 +125,7 @@ int main()
  1. [Done] Сделать подсчёт очков.
  2. [Done] Добавить уровни сложности.
  3. [Done] Добавить функцию очистки экрана при заполнении поля или перехода к следующему уровню.
- 4. Показывать следующие фигуры и откладывать фигуры.
+ 4. [Done] Показывать следующие фигуры. 
  5. [Done] Разноцветные фигуры.
  6. [Done] Сделать динамический размер игрового поля.
  7. [Done] Коррекция координат при повороте.
@@ -42,6 +133,7 @@ int main()
  9. [Done] Добавить мультиплеер на одном компьютере.
  10. Добавить игровое меню.
  11. Добавить звук в игре.
+ 12. Откладывать фигуры.
 
  20. Добавить мультиплеер по сети.
  21. Добавить графический режим.

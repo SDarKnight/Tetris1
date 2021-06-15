@@ -39,7 +39,7 @@ Rotation::Rotation(const char* line, int x, int y) : x(x), y(y)
 	width = maxBlocksInLine;
 }
 
-Figure::Figure(Board& board) : board(board) {}
+Figure::Figure(Board& board) : board(board), next(Random()) {}
 
 void Figure::Draw()
 {
@@ -49,6 +49,22 @@ void Figure::Draw()
 		}
 	}
 }
+
+void Figure::DrawNext()
+{
+	for (int r = 0; r < 4; r++) {
+		for (int c = 0; c < 4; c++) {
+			Block& b = types[next][0][r][c];
+			int x = board.columns + board.x + 5 + c + 1, y = board.y + r + 10;
+			if (b) {
+				b.Draw(x,y);
+			} else {
+				Screen::cur->Draw(x, y,' ');
+			}
+		}
+	}
+}
+
 void Figure::Place()
 {
 	for (int r = 0; r < 4; r++) {
@@ -57,6 +73,7 @@ void Figure::Place()
 		}
 	}
 }
+
 bool Figure::CanPlace(int rot, int x, int y)
 {
 	auto& f = types[type][rot];
@@ -97,9 +114,8 @@ void Figure::Rotate(int clockwise)
 }
 void Figure::Drop()
 {
-	unsigned short random;
-	if( !_rdseed16_step(&random) ) _rdrand16_step(&random);
-	type = random % figures;
+	type = next;
+	next = Random();
 	//type = rand() % figures;
 	rot = 0;
 	x = (board.columns - types[type][rot].width) / 2 ;
@@ -113,4 +129,11 @@ Block* Figure::BlockInBoard(int boardX, int boardY)
 		if (b) return &b;
 	}
 	return 0;
+}
+
+int Figure::Random()
+{
+	unsigned short random;
+	if (!_rdseed16_step(&random)) _rdrand16_step(&random);
+	return random % figures;
 }
