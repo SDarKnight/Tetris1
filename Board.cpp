@@ -52,6 +52,7 @@ void Board::Draw()
 }
 void Board::ClearLine(int y)
 {
+	figure.Clear();
 	for (int r = y; r > 0; r--) {
 		for (int c = 0; c < width; c++) {
 			(*this)[r][c] = (*this)[r - 1][c];
@@ -60,6 +61,8 @@ void Board::ClearLine(int y)
 	for (int c = 0; c < width; c++) {
 		(*this)[0][c] = 0;
 	}
+	if( figure.Move(0, 1) ) figure.Move(0, -1);
+	figure.Reset();
 }
 void Board::CheckLines()
 {
@@ -68,7 +71,7 @@ void Board::CheckLines()
 	for (int r = 0; r < height; r++) {
 		bool full = true;
 		for (int c = 0; c < width; c++) {
-			if( ! (*this)[r][c] ) {
+			if( !(*this)[r][c].Occupied() ) {
 				full = false;
 				break;
 			}
@@ -85,6 +88,7 @@ void Board::CheckLines()
 void Board::StartNewLevel()
 {
 	frameSkip--;
+	if( frameSkip < 1 ) frameSkip = 1;
 	frame = 0;
 	level++;
 	levelLinesCleared = 0;

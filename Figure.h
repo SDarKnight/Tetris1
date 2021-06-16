@@ -38,6 +38,7 @@ struct Figure
 	bool CanPlace(int rot, int x, int y);
 	bool Move(int dx, int dy, int rotate = 0);
 	void Drop();
+	void Clear();
 	void Reset();
 	static Shape types[];
 	static const int figures;

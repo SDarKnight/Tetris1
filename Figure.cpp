@@ -119,9 +119,14 @@ void Figure::Drop()
 	Reset();
 }
 
+void Figure::Clear()
+{
+	for (auto& b : board) if (b.figure) b = 0;
+}
+
 void Figure::Reset()
 {
-	for( auto& b: board ) if( b.figure ) b = 0;
+	Clear();
 	int movedY = 0;
 	while( Move(0, 1) ) movedY++;
 	if( movedY > 0 ){
