@@ -115,6 +115,7 @@ void Board::Play()
 	if (down) dy++;
 	if (figure.Move(dx, dy, rotate)) figure.Reset();
 	if (hardDrop) {
+		PlaySoundA("Drop.wav", NULL, SND_FILENAME | SND_ASYNC);
 		while (figure.Move(0, 1));
 		figure.Place();
 		figure.Drop();
