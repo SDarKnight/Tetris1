@@ -1,10 +1,13 @@
 struct Block
 {
 	char c;
-	Block(char c = 0) : c(c) {}
-	void Draw(int x, int y, bool shadow = false);
-	void Place(Block& b);
+	bool figure;
+	bool shadow;
+	Block(char c = 0) : c(c), figure(0), shadow(0) {}
 	explicit operator bool() { return c; }
+	bool Occupied() { return c && ! figure; }
+	void Draw(int x, int y);
+	void Place(Block& b, bool figure = 0, bool shadow = 0);
 };
 
 struct Rotation
@@ -30,14 +33,12 @@ struct Figure
 	int type, next, rot, x, y;
 	struct Board& board;
 	Figure(Board& board);
-	void Draw();
 	void DrawNext();
-	void Place();
+	void Place(bool figure = 0, bool shadow = 0);
 	bool CanPlace(int rot, int x, int y);
-	bool Move(int dx, int dy);
-	void Rotate(int clockwise);
+	bool Move(int dx, int dy, int rotate = 0);
 	void Drop();
-	Block* BlockInCell(int x, int y, bool& shadow);
+	void Reset();
 	static Shape types[];
 	static const int figures;
 	int Random();

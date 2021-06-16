@@ -14,7 +14,7 @@ struct Control
 struct Board
 {
 	Block* block;
-	int rows, columns, size;
+	int height, width, size;
 	int x, y;
 	int frame = 0;
 	int frameSkip = 20;
@@ -24,8 +24,10 @@ struct Board
 	Control left, right, down, rotateLeft, rotateRight, hardDrop;
 	Figure figure;
 	~Board();
-	Board(int rows, int columns, int x, int y, Control left, Control right, Control down, Control rotateLeft, Control rotateRight, Control hardDrop);
-	Block* operator[](int y) { return &block[y * columns]; }
+	Board(int width, int height, int x, int y, Control left, Control right, Control down, Control rotateLeft, Control rotateRight, Control hardDrop);
+	Block* operator[](int y) { return &block[y * width]; }
+	Block* begin() { return block; }
+	Block* end() { return block + size; }
 	void Clear();
 	void Draw();
 	void ClearLine(int y);

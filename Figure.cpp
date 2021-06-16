@@ -1,25 +1,29 @@
 #include "pch.h"
 
-void Block::Draw(int x, int y, bool shadow)
+void Block::Draw(int x, int y)
 {
-	if (*this) {
+	if( *this ){
 		int color = c << !shadow * 4;
 		Screen::cur->Draw(x, y, shadow ? '°' : '[', color);
-		Screen::cur->Draw(x+1, y, shadow ? '°' : ']', color);
-	} else {
+		Screen::cur->Draw(x + 1, y, shadow ? '°' : ']', color);
+	}else{
 		Screen::cur->Draw(x, y, ' ');
-		Screen::cur->Draw(x+1, y, ' ');
+		Screen::cur->Draw(x + 1, y, ' ');
 	}
 }
 
-void Block::Place(Block& b)
+void Block::Place(Block& b, bool figure, bool shadow)
 {
-	if (b) *this = b;
+	if( b ){
+		c = b.c;
+		this->figure = figure;
+		this->shadow = shadow;
+	}
 }
 
 Rotation::Rotation(int color, Rotation& r): Rotation(r)
 {
-	for (auto& br: block) for (auto& b : br) if (b) b = color;
+	for (auto& br: block) for (auto& b : br) if( b ) b = color;
 }
 
 Rotation::Rotation(const char* line, int x, int y) : x(x), y(y)
@@ -48,31 +52,20 @@ Rotation::Rotation(const char* line, int x, int y) : x(x), y(y)
 
 Figure::Figure(Board& board) : board(board), next(Random()) {}
 
-void Figure::Draw()
-{
-	for (int r = 0; r < 4; r++) {
-		if (r + y >= 0) for (int c = 0; c < 4; c++) {
-			types[type][rot][r][c].Draw( board.x + x + c + 1, board.y + r + y );
-		}
-	}
-}
-
 void Figure::DrawNext()
 {
 	for (int r = 0; r < 4; r++) {
 		for (int c = 0; c < 4; c++) {
-			Block& b = types[next][0][r][c];
-			int x = board.columns*2 + board.x + 5 + c*2 + 1, y = board.y + r + 10;
-			b.Draw(x,y);
+			types[next][0][r][c].Draw(board.width * 2 + board.x + 5 + c * 2 + 1, board.y + r + 10);
 		}
 	}
 }
 
-void Figure::Place()
+void Figure::Place(bool figure, bool shadow)
 {
 	for (int r = 0; r < 4; r++) {
 		for (int c = 0; c < 4; c++) {
-			board[y + r][x + c].Place( types[type][rot][r][c] );
+			board[y + r][x + c].Place( types[type][rot][r][c], figure, shadow );
 		}
 	}
 }
@@ -80,40 +73,40 @@ void Figure::Place()
 bool Figure::CanPlace(int rot, int x, int y)
 {
 	auto& f = types[type][rot];
-	if (y > board.rows - f.height) {
-		return false;
-	}
-	for (int r = 0; r < 4; r++) {
-		for (int c = 0; c < 4; c++) {
-			if (y + r >= 0 && f[r][c] && board[y + r][x + c]) {
+	for( int r = 0; r < 4; r++ ){
+		for( int c = 0; c < 4; c++ ){
+			if( f[r][c] && board[y + r][x + c].Occupied() ){
 				return false;
 			}
 		}
 	}
 	return true;
 }
-bool Figure::Move(int dx, int dy)
+bool Figure::Move(int dx, int dy, int rotate)
 {
-	bool move = CanPlace(rot, x + dx, y + dy);
-	if (move) {
-		x += dx;
-		y += dy;
-		x = clamp(x, 0, board.columns - types[type][rot].width);
-	}
-	return move;
-}
-void Figure::Rotate(int clockwise)
-{
-	int newRot = (rot + clockwise) & 3;
+	int newRot = (rot + rotate) & 3;
 	auto& f = types[type][newRot];
-	int newX = x + (clockwise > 0 ? f.x : -f.y);
-	int newY = y + (clockwise > 0 ? f.y : -f.x);
-	if (CanPlace(newRot, newX, newY)) rot = newRot, x = newX, y = newY;
-	else if (CanPlace(newRot, newX + 1, newY)) rot = newRot, x = newX + 1, y = newY;
-	else if (CanPlace(newRot, newX - 1, newY)) rot = newRot, x = newX - 1, y = newY;
-	//else if (CanPlace(newRot, newX, newY + 1)) rot = newRot, x = newX, y = newY + 1;
-	//else if (CanPlace(newRot, newX, newY - 1)) rot = newRot, x = newX, y = newY - 1;
-	x = clamp(x, 0, board.columns - f.width);
+	int newX = clamp(x + dx + (rotate ? (rotate > 0 ? f.x : -f.y) : 0), 0, board.width - f.width);
+	int newY = clamp(y + dy + (rotate ? (rotate > 0 ? f.y : -f.x) : 0), 0, board.height - f.height);
+	bool moved = (x != newX || y != newY || rot != newRot) && CanPlace(newRot, newX, newY);
+	if( !moved && rotate ){
+		int newNewX = clamp(newX + 1, 0, board.width - f.width);
+		moved = newNewX != newX && CanPlace(newRot, newNewX, newY);
+	}
+	if( !moved && rotate ){
+		int newNewX = clamp(newX - 1, 0, board.width - f.width);
+		moved = newNewX != newX && CanPlace(newRot, newNewX, newY);
+	}
+	if( !moved && rotate && newY == 0 ){
+		int newNewY = clamp(newY + 1, 0, board.height - f.height);
+		moved = newNewY != newY && CanPlace(newRot, newX, newNewY);
+	}
+	if( moved = moved && (x != newX || y != newY || rot != newRot) ){
+		x = newX;
+		y = newY;
+		rot = newRot;
+	}
+	return moved;
 }
 void Figure::Drop()
 {
@@ -121,35 +114,21 @@ void Figure::Drop()
 	next = Random();
 	//type = rand() % figures;
 	rot = 0;
-	x = (board.columns - types[type][rot].width) / 2 ;
+	x = (board.width - types[type][rot].width) / 2 ;
 	y = 0;
+	Reset();
 }
 
-Block* Figure::BlockInCell(int boardX, int boardY, bool& shadow)
+void Figure::Reset()
 {
-	auto& f = types[type][rot];
-	Block* result = 0;
-	Block* b;
-	auto check = [&]() {
-		return boardX >= x
-			&& boardX <  x + f.width
-			&& boardY >= y
-			&& boardY <  y + f.height
-			&& *(b = &f[boardY - y][boardX - x]); };
-	if( check() ){
-		result = b;
-	}else{
-		int movedY = 0;
-		while(Move(0, 1)) movedY++;
-		if (movedY > 0) {
-			if( check() ){
-				result = b;
-				shadow = true;
-			}
-			y -= movedY;
-		}
+	for( auto& b: board ) if( b.figure ) b = 0;
+	int movedY = 0;
+	while( Move(0, 1) ) movedY++;
+	if( movedY > 0 ){
+		Place(1, 1);
+		y -= movedY;
 	}
-	return result;
+	Place(1, 0);
 }
 
 int Figure::Random()

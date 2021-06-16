@@ -8,6 +8,8 @@ TextScreen::TextScreen()
 	cursorInfo.bVisible = 0;
 	SetConsoleCursorInfo(out, &cursorInfo);
 	SetForegroundWindow(GetActiveWindow());
+	Sleep(250);
+	SetForegroundWindow(GetActiveWindow());
 }
 
 void TextScreen::Draw(short x, short y, char c, int color)
