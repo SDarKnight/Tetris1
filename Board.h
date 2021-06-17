@@ -34,5 +34,6 @@ struct Board
 	void CheckLines();
 	void StartNewLevel();
 	void DrawInfo();
+	void Sound(const char* name);
 	void Play();
 };

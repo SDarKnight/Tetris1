@@ -105,6 +105,12 @@ void Board::DrawInfo()
 	sprintf_s(s, "score: %d   ", scores);
 	Screen::cur->Draw(x + width*2 + 4, y + 5, s);
 }
+void Board::Sound(const char* name)
+{
+	char n[128];
+	sprintf_s(n, "%s%s.wav", name, x < 10 ? "L" : "R");
+	PlaySoundA(n, NULL, SND_FILENAME | SND_ASYNC);
+}
 void Board::Play()
 {
 	int dx = 0, dy = 0, rotate = 0;
@@ -115,7 +121,7 @@ void Board::Play()
 	if (down) dy++;
 	if (figure.Move(dx, dy, rotate)) figure.Reset();
 	if (hardDrop) {
-		PlaySoundA("Drop.wav", NULL, SND_FILENAME | SND_ASYNC);
+		Sound("Drop");
 		while (figure.Move(0, 1));
 		figure.Place();
 		figure.Drop();

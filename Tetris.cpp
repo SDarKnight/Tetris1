@@ -69,8 +69,25 @@ void DrawAsciiTable(int startX, int startY)
 
 //char h[] = "Hello !";
 
+void StartGame()
+{
+	for (auto& p : players) p.hardDrop.press = 1;
+	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
+		for (auto& p : players) {
+			p.Play();
+		}
+		for (int i = 0; i < 2; i++) {
+			players[i].Play();
+		}
+		Sleep(16);
+	}
+}
+
+Menu menu = { { {"Start game", StartGame}, {"Exit", &Menu::Exit} }, 0 };
+
 int main()
 {
+	menu.Play();
 	//*(int*)0 = 1;
 	//*1 = 2;
 
@@ -112,12 +129,7 @@ int main()
 	
 	//srand((int)time(0));
 	//DrawAsciiTable(63, 1); return 0;
-	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
-		for (auto& p : players) {
-			p.Play();
-		}
-		Sleep(16);
-	}
+
 	return 0;
 }
 

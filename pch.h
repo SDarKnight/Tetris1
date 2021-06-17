@@ -9,3 +9,4 @@ using namespace std;
 #include "Engine.h"
 #include "Figure.h"
 #include "Board.h"
+#include "Menu.h"
