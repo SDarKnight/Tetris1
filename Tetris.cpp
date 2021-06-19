@@ -1,10 +1,5 @@
 #include "pch.h"
 
-Board players[] = {
-	{12, 18, 1, 1,'A', 'D', 'S', {VK_LCONTROL,0}, {'W',0}, {VK_SPACE,0}},
-	{12, 18, 42, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
-};
-
 void DrawAsciiTable(int startX, int startY)
 {
 	char buf[16]{ 0 };
@@ -69,25 +64,43 @@ void DrawAsciiTable(int startX, int startY)
 
 //char h[] = "Hello !";
 
-void StartGame()
+Board single[] = {
+	{12, 18, 20, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {'C',0}, {VK_UP, 0}, {VK_SPACE,0}}
+};
+
+Board split[] = {
+	{12, 18, 1, 1,'A', 'D', 'S', {VK_LCONTROL,0}, {'W',0}, {VK_SPACE,0}},
+	{12, 18, 42, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
+};
+
+template <int n>
+void Game(Board (&players)[n])
 {
+	Screen::cur->Clear();
 	for (auto& p : players) p.hardDrop.press = 1;
 	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
 		for (auto& p : players) {
 			p.Play();
 		}
-		for (int i = 0; i < 2; i++) {
-			players[i].Play();
-		}
 		Sleep(16);
 	}
 }
 
-Menu menu = { { {"Start game", StartGame}, {"Exit", &Menu::Exit} }, 0 };
+void Single()
+{
+	Game(single);
+}
+
+void Split()
+{
+	Game(split);
+}
+
+
+Menu menu = { { {"New 1 player", Single }, {"New 2 player", Split}, {"Exit", &Menu::Exit} }, 0 };
 
 int main()
 {
-	menu.Play();
 	//*(int*)0 = 1;
 	//*1 = 2;
 
@@ -129,6 +142,8 @@ int main()
 	
 	//srand((int)time(0));
 	//DrawAsciiTable(63, 1); return 0;
+
+	menu.Play();
 
 	return 0;
 }

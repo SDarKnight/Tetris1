@@ -23,4 +23,9 @@ void TextScreen::Draw(short x, short y, const char* c, int color)
 	WriteConsoleA(out, c, strlen(c), 0, 0);
 }
 
+void TextScreen::Clear()
+{
+	for (int x = 0; x < 80; x++) for (int y = 0; y < 25; y++) Draw(x, y, ' ');
+}
+
 Screen* Screen::cur = new TextScreen();

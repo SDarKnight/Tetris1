@@ -3,18 +3,21 @@
 void Menu::Draw()
 {
 	int y = 5, x = 30;
-	Screen::cur->Draw(x, ++y, "                          ");
-	Screen::cur->Draw(x, ++y, "  M E G A    T E T R I S  ");
-	Screen::cur->Draw(x, ++y, "                          ");
-	Screen::cur->Draw(x, ++y, "                          ");
+	Screen::cur->Draw(x, ++y, "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿");
+	Screen::cur->Draw(x, ++y, "³                        ³");
+	Screen::cur->Draw(x, ++y, "³ M E G A    T E T R I S ³");
+	Screen::cur->Draw(x, ++y, "³                        ³");
 	for (int i = 0; i < 3; i++) {
-		Screen::cur->Draw(x, y + i * 2 + 1, i == cur ? " --> " : "     ");
 		if (auto t = item[i].text){
-			Screen::cur->Draw(x + 5, y + i * 2 + 1, t);
-			Screen::cur->Draw(x, y + i * 2 + 2, "                          ");
+			Screen::cur->Draw(x, ++y, "³                        ³");
+			Screen::cur->Draw(x, ++y, i == cur ? "³ -> " : "³    ");
+			Screen::cur->Draw(x + 5, y, t);
+			for (int i = strlen(t); i < 16; i++) Screen::cur->Draw(x + 5 + i, y, ' ');
+			Screen::cur->Draw(x + 21, y, i == cur ? " <- ³" : "    ³");
 		}
-		Screen::cur->Draw(x + 21, y + i * 2 + 1, i == cur ? " <-- " : "     ");
 	}
+	Screen::cur->Draw(x, ++y, "³                        ³");
+	Screen::cur->Draw(x, ++y, "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ");
 }
 
 void Menu::Move(int d)
