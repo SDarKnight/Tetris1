@@ -91,6 +91,7 @@ void Board::Continue()
 }
 void Board::Restart()
 {
+	Clear();
 	frame = 0;
 	frameSkip = 20;
 	scores = 0;
