@@ -73,22 +73,16 @@ Board split[] = {
 	{12, 18, 42, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
 };
 
-bool quit = false;
+bool quit;
 
-void Exit()
-{
-	quit = true;
-}
-
-template <int n>
-void Game(Board (&players)[n])
+void Game(auto& players)
 {
 	Screen::cur->Clear();
 	for (auto& p : players) p.Restart();
 	quit = false;
 	while (!quit){
 		if (GetAsyncKeyState(VK_ESCAPE) & 1) {
-			Menu{ { { "Exit", Exit, &Menu::Exit } } }.Play();
+			Menu { { { "Exit", []() { quit = true; }, &Menu::Exit } } }.Play();
 			Screen::cur->Clear();
 			for (auto& p : players) p.Continue();
 		}
@@ -99,21 +93,14 @@ void Game(Board (&players)[n])
 	}
 }
 
-void Single()
-{
-	Game(single);
-}
-
-void Split()
-{
-	Game(split);
-}
-
 int main()
 {
 	//srand((int)time(0));
 	//DrawAsciiTable(63, 1); return 0;
-	Menu { { {"New 1 player", Single }, {"New 2 player", Split}, {"Exit", &Menu::Exit} } }.Play();
+
+	Menu{ { {"New 1 player", []() { Game(single); } },
+			{"New 2 player", []() { Game(split); } },
+			{"Exit", &Menu::Exit} } }.Play();
 
 	return 0;
 }
