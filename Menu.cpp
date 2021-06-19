@@ -3,21 +3,21 @@
 void Menu::Draw()
 {
 	int y = 5, x = 30;
-	Screen::cur->Draw(x, ++y, "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿");
-	Screen::cur->Draw(x, ++y, "³                        ³");
-	Screen::cur->Draw(x, ++y, "³ M E G A    T E T R I S ³");
-	Screen::cur->Draw(x, ++y, "³                        ³");
+	SDraw(x, ++y, "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿");
+	SDraw(x, ++y, "³                        ³");
+	SDraw(x, ++y, "³ M E G A    T E T R I S ³");
+	SDraw(x, ++y, "³                        ³");
 	for (int i = 0; i < 3; i++) {
 		if (auto t = item[i].text){
-			Screen::cur->Draw(x, ++y, "³                        ³");
-			Screen::cur->Draw(x, ++y, i == cur ? "³ -> " : "³    ");
-			Screen::cur->Draw(x + 5, y, t);
-			for (int i = strlen(t); i < 16; i++) Screen::cur->Draw(x + 5 + i, y, ' ');
-			Screen::cur->Draw(x + 21, y, i == cur ? " <- ³" : "    ³");
+			SDraw(x, ++y, "³                        ³");
+			SDraw(x, ++y, i == cur ? "³ -> " : "³    ");
+			SDraw(x + 5, y, t);
+			for (int i = strlen(t); i < 16; i++) SDraw(x + 5 + i, y, ' ');
+			SDraw(x + 21, y, i == cur ? " <- ³" : "    ³");
 		}
 	}
-	Screen::cur->Draw(x, ++y, "³                        ³");
-	Screen::cur->Draw(x, ++y, "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ");
+	SDraw(x, ++y, "³                        ³");
+	SDraw(x, ++y, "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ");
 }
 
 void Menu::Move(int d)
@@ -31,7 +31,10 @@ void Menu::Move(int d)
 
 void Menu::Play()
 {
-	while ( ! quit && !(GetAsyncKeyState(VK_ESCAPE) & 1) ) {
+	while ( ! quit  ) {
+		if (GetAsyncKeyState(VK_ESCAPE) & 1) {
+			quit = true;
+		}
 		if (GetAsyncKeyState(VK_RETURN) & 1) {
 			if( item[cur].action ) item[cur].action();
 			if( item[cur].menuAction ) (this->*item[cur].menuAction)();

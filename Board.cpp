@@ -37,17 +37,17 @@ void Board::Clear()
 void Board::Draw()
 {
 	for (int r = 0; r < height; r++) {
-		Screen::cur->Draw(x, y + r, '³', 7);
+		SDraw(x, y + r, '³', 7);
 		for (int c = 0; c < width; c++) {
 			(*this)[r][c].Draw(x + c*2 + 1, y + r);
 		}
-		Screen::cur->Draw(x + width*2 + 1, y + r, '³', 7);
+		SDraw(x + width*2 + 1, y + r, '³', 7);
 	}
-	Screen::cur->Draw(x, y + height, 'À', 7);
+	SDraw(x, y + height, 'À', 7);
 	for (int c = 0; c < width * 2; c++) {
-		Screen::cur->Draw(x + c + 1, y + height, 'Ä', 7);
+		SDraw(x + c + 1, y + height, 'Ä', 7);
 	}
-	Screen::cur->Draw(x + width*2 + 1, y + height, 'Ù', 7);
+	SDraw(x + width*2 + 1, y + height, 'Ù', 7);
 	figure.DrawNext();
 }
 void Board::ClearLine(int y)
@@ -85,7 +85,20 @@ void Board::CheckLines()
 	scores += cellsRemoved * linesCleared * level;
 	levelLinesCleared += linesCleared;
 }
-void Board::StartNewLevel()
+void Board::Continue()
+{
+	hardDrop.press = 1;
+}
+void Board::Restart()
+{
+	frame = 0;
+	frameSkip = 20;
+	scores = 0;
+	level = 1;
+	levelLinesCleared = 0;
+	Continue();
+}
+void Board::NextLevel()
 {
 	frameSkip--;
 	if( frameSkip < 1 ) frameSkip = 1;
@@ -99,11 +112,11 @@ void Board::DrawInfo()
 {
 	char s[256];
 	sprintf_s(s, "frame: %d ", frame % frameSkip);
-	Screen::cur->Draw(x + width*2 + 4, y + 1, s);
+	SDraw(x + width*2 + 4, y + 1, s);
 	sprintf_s(s, "level: %d ", level);
-	Screen::cur->Draw(x + width*2 + 4, y + 3, s);
+	SDraw(x + width*2 + 4, y + 3, s);
 	sprintf_s(s, "score: %d   ", scores);
-	Screen::cur->Draw(x + width*2 + 4, y + 5, s);
+	SDraw(x + width*2 + 4, y + 5, s);
 }
 void Board::Sound(const char* name)
 {
@@ -138,7 +151,7 @@ void Board::Play()
 	Draw();
 	DrawInfo();
 	if (levelLinesCleared >= 5) {
-		StartNewLevel();
+		NextLevel();
 	}
 	frame++;
 }

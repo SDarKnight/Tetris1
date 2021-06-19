@@ -5,9 +5,9 @@ void DrawAsciiTable(int startX, int startY)
 	char buf[16]{ 0 };
 	for (int y = 0; y < 16; y++) {
 		_itoa_s(y * 16, buf, 10);
-		Screen::cur->Draw(startX - 4, startY + y, buf);
+		SDraw(startX - 4, startY + y, buf);
 		for (int x = 0; x < 16; x++) {
-			Screen::cur->Draw(startX + x, startY + y, y * 16 + x);
+			SDraw(startX + x, startY + y, y * 16 + x);
 		}
 	}
 }
@@ -73,12 +73,25 @@ Board split[] = {
 	{12, 18, 42, 1,  VK_LEFT, VK_RIGHT, VK_DOWN, {VK_RCONTROL,0}, {VK_UP, 0}, {VK_RETURN,0}}
 };
 
+bool quit = false;
+
+void Exit()
+{
+	quit = true;
+}
+
 template <int n>
 void Game(Board (&players)[n])
 {
 	Screen::cur->Clear();
-	for (auto& p : players) p.hardDrop.press = 1;
-	while (GetAsyncKeyState(VK_ESCAPE) >= 0) {
+	for (auto& p : players) p.Restart();
+	quit = false;
+	while (!quit){
+		if (GetAsyncKeyState(VK_ESCAPE) & 1) {
+			Menu{ { { "Exit", Exit } } }.Play();
+			Screen::cur->Clear();
+			for (auto& p : players) p.Continue();
+		}
 		for (auto& p : players) {
 			p.Play();
 		}
@@ -96,54 +109,11 @@ void Split()
 	Game(split);
 }
 
-
-Menu menu = { { {"New 1 player", Single }, {"New 2 player", Split}, {"Exit", &Menu::Exit} }, 0 };
-
 int main()
 {
-	//*(int*)0 = 1;
-	//*1 = 2;
-
-	//*(short*)(4337666) = 'rr';
-	//*h = 'M';
-
-	//cout << h << endl;
-	
-	//int ar[5];
-	//for (int i = 0; i <= 4; i++) {
-	//	cin >> ar[i];
-	//}
-	//for (int i = 4; i >= 0; i--) {
-	//	cout << ar[i] << ' ';
-	//}
-
-	//int bv = 123;
-	//int& b = *new int(123);
-	////b = new int;
-	//bv++;
-	//b++;
-	//int* a = &b;
-	//&b;
-	//
-	//int* a = new int(123);
-	//a = new int;
-	//a++;
-	//*a;
-	//int** c = &a;
-	//**c = 3;
-	//
-	//a = incValue(a);
-	//incPointer(&a);
-	//incReference(a);
-	//
-	//cout << a << endl;
-
-	//return 0;
-	
 	//srand((int)time(0));
 	//DrawAsciiTable(63, 1); return 0;
-
-	menu.Play();
+	Menu { { {"New 1 player", Single }, {"New 2 player", Split}, {"Exit", &Menu::Exit} } }.Play();
 
 	return 0;
 }
@@ -158,7 +128,7 @@ int main()
  7. [Done] Коррекция координат при повороте.
  8. [Done] Разная вероятность выпадения фигур.
  9. [Done] Добавить мультиплеер на одном компьютере.
- 10. Добавить игровое меню.
+ 10. [Done] Добавить игровое меню.
  11. Добавить звук в игре.
 
  20. Добавить мультиплеер по сети.

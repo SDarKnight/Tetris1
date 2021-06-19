@@ -4,11 +4,11 @@ void Block::Draw(int x, int y)
 {
 	if( *this ){
 		int color = c << !shadow * 4;
-		Screen::cur->Draw(x, y, shadow ? '°' : '[', color);
-		Screen::cur->Draw(x + 1, y, shadow ? '°' : ']', color);
+		SDraw(x, y, shadow ? '°' : '[', color);
+		SDraw(x + 1, y, shadow ? '°' : ']', color);
 	}else{
-		Screen::cur->Draw(x, y, ' ');
-		Screen::cur->Draw(x + 1, y, ' ');
+		SDraw(x, y, ' ');
+		SDraw(x + 1, y, ' ');
 	}
 }
 

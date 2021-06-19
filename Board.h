@@ -16,11 +16,11 @@ struct Board
 	Block* block;
 	int height, width, size;
 	int x, y;
-	int frame = 0;
-	int frameSkip = 20;
-	int scores = 0;
-	int level = 1;
-	int levelLinesCleared = 0;
+	int frame;
+	int frameSkip;
+	int scores;
+	int level;
+	int levelLinesCleared;
 	Control left, right, down, rotateLeft, rotateRight, hardDrop;
 	Figure figure;
 	~Board();
@@ -32,7 +32,9 @@ struct Board
 	void Draw();
 	void ClearLine(int y);
 	void CheckLines();
-	void StartNewLevel();
+	void Continue();
+	void Restart();
+	void NextLevel();
 	void DrawInfo();
 	void Sound(const char* name);
 	void Play();

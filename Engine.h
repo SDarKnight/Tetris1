@@ -14,3 +14,5 @@ struct TextScreen : Screen
 	void Draw(short x, short y, const char* c, int color = 0);
 	void Clear();
 };
+
+#define SDraw(...) Screen::cur->Draw(__VA_ARGS__)

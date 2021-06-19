@@ -12,7 +12,7 @@ struct MenuItem
 struct Menu
 {
 	MenuItem item[3];
-	int cur;
+	int cur = 0;
 	bool quit = false;
 	void Draw();
 	void Play();
