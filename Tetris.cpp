@@ -88,7 +88,7 @@ void Game(Board (&players)[n])
 	quit = false;
 	while (!quit){
 		if (GetAsyncKeyState(VK_ESCAPE) & 1) {
-			Menu{ { { "Exit", Exit } } }.Play();
+			Menu{ { { "Exit", Exit, &Menu::Exit } } }.Play();
 			Screen::cur->Clear();
 			for (auto& p : players) p.Continue();
 		}
