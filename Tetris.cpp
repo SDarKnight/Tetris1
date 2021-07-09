@@ -79,6 +79,13 @@ void Game(auto& players)
 {
 	Screen::cur->Clear();
 	for (auto& p : players) p.Restart();
+	for (int i = 0; i < _countof(players); i++) {
+		players[i].Restart();
+		players[i].player = i + 1;
+	}
+	if (_countof(players) == 1) {
+		players[0].player = 0;
+	}
 	quit = false;
 	while (!quit){
 		if (GetAsyncKeyState(VK_ESCAPE) & 1) {
@@ -96,7 +103,14 @@ void Game(auto& players)
 int main()
 {
 	//srand((int)time(0));
-	//DrawAsciiTable(63, 1); return 0;
+	//DrawAsciiTable(63, 1);
+	
+	//int age;
+	//age = 14;
+	//char name[5];
+	//_snprintf_s(name, _TRUNCATE, "Hello Stepa %d !", age);
+	//printf(name);
+	//return 0;
 
 	Menu{ { {"New 1 player", []() { Game(single); } },
 			{"New 2 player", []() { Game(split); } },

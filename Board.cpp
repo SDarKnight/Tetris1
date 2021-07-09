@@ -122,7 +122,13 @@ void Board::DrawInfo()
 void Board::Sound(const char* name)
 {
 	char n[128];
-	sprintf_s(n, "%s%s.wav", name, x < 10 ? "L" : "R");
+	const char* p;
+	switch (player) {
+	case 1: p = "L"; break;
+	case 2: p = "R"; break;
+	default: p = ""; break;
+	}
+	sprintf_s(n, "%s%s.wav", name, p);
 	PlaySoundA(n, NULL, SND_FILENAME | SND_ASYNC);
 }
 void Board::Play()
@@ -130,12 +136,12 @@ void Board::Play()
 	int dx = 0, dy = 0, rotate = 0;
 	if (left) dx--;
 	if (right) dx++;
-	if (rotateRight) rotate++;
-	if (rotateLeft) rotate--;
+	if (rotateRight) { Sound("Rotate"); rotate++; }
+	if (rotateLeft ) { Sound("Rotate"); rotate--; }
 	if (down) dy++;
 	if (figure.Move(dx, dy, rotate)) figure.Reset();
 	if (hardDrop) {
-		Sound("Drop");
+		//Sound("Drop");
 		while (figure.Move(0, 1));
 		figure.Place();
 		figure.Drop();

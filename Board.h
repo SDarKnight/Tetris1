@@ -23,6 +23,7 @@ struct Board
 	int levelLinesCleared;
 	Control left, right, down, rotateLeft, rotateRight, hardDrop;
 	Figure figure;
+	int player;
 	~Board();
 	Board(int width, int height, int x, int y, Control left, Control right, Control down, Control rotateLeft, Control rotateRight, Control hardDrop);
 	Block* operator[](int y) { return &block[y * width]; }
